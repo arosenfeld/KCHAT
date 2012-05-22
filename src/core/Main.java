@@ -4,10 +4,7 @@ import java.io.IOException;
 
 import net.UdpMulticast;
 
-import packets.Message;
-import packets.Message.ChatFields;
 import util.Configuration;
-import util.LongInteger;
 
 public class Main {
 
