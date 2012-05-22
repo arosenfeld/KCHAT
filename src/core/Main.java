@@ -5,6 +5,7 @@ import java.io.IOException;
 import net.UdpMulticast;
 
 import util.Configuration;
+import util.Logging;
 
 public class Main {
 
@@ -18,16 +19,19 @@ public class Main {
         m.setParam(ChatFields.PERSIST, true);
         System.out.println(m.toString());
         byte[] packed = m.pack();*/
+        
         String propertiesPath = System.getProperty("kchat.propertiesPath");
         if(propertiesPath == null) {
             propertiesPath = "kchat.properties";
         }
         Configuration.getInstance().setFile(propertiesPath);
+        
         Broker.getInstance().setProtocol(
                 new UdpMulticast(
                         Configuration.getInstance().getValueAsString("udp.iface"),
                         Configuration.getInstance().getValueAsString("udp.host"), 
                         Configuration.getInstance().getValueAsInt("udp.port")));
+
         Broker.getInstance().start();
     }
 }
