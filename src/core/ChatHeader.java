@@ -9,7 +9,7 @@ import util.PacketWriter;
 public class ChatHeader implements Packable {
     private byte version;
     private LongInteger src;
-    private byte type;
+    private PacketType type;
     private byte numExtensions;
     private byte[][] extensions;
 
@@ -17,8 +17,11 @@ public class ChatHeader implements Packable {
         unPack(header);
     }
 
-    public ChatHeader(byte version, LongInteger src, byte type,
+    public ChatHeader(byte version, LongInteger src, PacketType type,
             byte[][] extensions) {
+        this.version = version;
+        this.src = src;
+        this.type = type;
         this.extensions = extensions;
 
         if (extensions == null) {
@@ -26,6 +29,10 @@ public class ChatHeader implements Packable {
         } else {
             this.numExtensions = (byte) extensions.length;
         }
+    }
+
+    public ChatHeader(byte version, LongInteger src, PacketType type) {
+        this(version, src, type, null);
     }
 
     public byte getVersion() {
@@ -36,7 +43,7 @@ public class ChatHeader implements Packable {
         return src;
     }
 
-    public byte getType() {
+    public PacketType getType() {
         return type;
     }
 
@@ -49,7 +56,7 @@ public class ChatHeader implements Packable {
         PacketWriter pw = new PacketWriter();
         pw.writeByte(version);
         pw.writeLongInteger(src);
-        pw.writeByte(type);
+        pw.writeByte(type.getValue());
         pw.writeByte(numExtensions);
         if (numExtensions > 0) {
             for (byte[] e : extensions) {
@@ -65,7 +72,7 @@ public class ChatHeader implements Packable {
         PacketReader pr = new PacketReader(data);
         version = pr.readByte();
         src = pr.readLongInteger();
-        type = pr.readByte();
+        type = PacketType.fromValue(pr.readByte());
 
         numExtensions = pr.readByte();
         extensions = new byte[numExtensions][];
@@ -76,9 +83,11 @@ public class ChatHeader implements Packable {
 
     @Override
     public int getLength() {
-        int len = 8 + 128 + 8 + 8;
-        for (byte[] e : extensions) {
-            len += e.length + 2;
+        int len = 1 + 16 + 1 + 1;
+        if (extensions != null) {
+            for (byte[] e : extensions) {
+                len += e.length + 2;
+            }
         }
         return len;
     }

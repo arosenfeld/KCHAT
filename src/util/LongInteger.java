@@ -30,4 +30,14 @@ public class LongInteger {
     public byte[] getValue() {
         return value;
     }
+    
+    @Override
+    public String toString() {
+        StringBuffer buf = new StringBuffer();
+        for(byte b : value) {
+            buf.append(b);
+            buf.append(" ");
+        }
+        return buf.toString();
+    }
 }

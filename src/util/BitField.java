@@ -26,4 +26,9 @@ public class BitField {
     public void clear() {
         value = 0;
     }
+    
+    @Override
+    public String toString() {
+        return String.valueOf(value);
+    }
 }
