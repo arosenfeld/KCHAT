@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.TreeMap;
 
 import packets.Message;
+import packets.PacketType;
 import packets.Message.MessageFields;
 
 import net.ChatHeader;

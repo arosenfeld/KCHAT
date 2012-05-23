@@ -10,7 +10,6 @@ import net.ChatHeader;
 
 import util.BitField;
 import util.LongInteger;
-import core.PacketType;
 
 public class Message extends ChatPacket {
     public enum MessageFields {

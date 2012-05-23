@@ -3,12 +3,12 @@ package net;
 import java.io.IOException;
 
 import packets.PacketField;
+import packets.PacketType;
 import packing.LengthCalculator;
 import packing.Packable;
 import packing.PacketReader;
 import packing.PacketWriter;
 
-import core.PacketType;
 import util.LongInteger;
 
 public class ChatHeader implements Packable {

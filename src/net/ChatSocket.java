@@ -2,7 +2,8 @@ package net;
 
 import java.util.List;
 
-import core.PacketType;
+import packets.PacketType;
+
 
 import listeners.Listener;
 

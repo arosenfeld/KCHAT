@@ -1,4 +1,4 @@
-package core;
+package packets;
 
 public enum PacketType {
     CHAT_MESSAGE(1), USER_PRESENCE(2), ROOM_COMPARISON(3), ROOM_STATUS(4), USER_STATUS(
