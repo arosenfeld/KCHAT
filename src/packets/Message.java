@@ -2,20 +2,23 @@ package packets;
 
 import java.io.IOException;
 
+import packing.LengthCalculator;
+import packing.PacketReader;
+import packing.PacketWriter;
+
+import net.ChatHeader;
+
 import util.BitField;
 import util.LongInteger;
-import util.PacketReader;
-import util.PacketWriter;
-import core.ChatHeader;
-import core.ChatPacket;
 import core.PacketType;
 
 public class Message extends ChatPacket {
-    public enum ChatFields {
+    public enum MessageFields {
         TO_ROOM((byte) 0), PERSIST((byte) 1);
 
         private byte index;
-        ChatFields(byte index) {
+
+        MessageFields(byte index) {
             this.index = index;
         }
 
@@ -24,12 +27,17 @@ public class Message extends ChatPacket {
         }
     }
 
+    @PacketField(size=1)
     private BitField params;
+    @PacketField(size=4)
     private int messageId;
+    @PacketField(size=4)
     private int persistenceId;
+    @PacketField(size=16)
     private LongInteger dest;
+    @PacketField(additional=2)
     private byte[] message;
-    
+
     public Message(byte[] data) {
         super(new ChatHeader(data));
         this.params = new BitField();
@@ -62,11 +70,11 @@ public class Message extends ChatPacket {
         return message;
     }
 
-    public boolean getParam(ChatFields field) {
+    public boolean getParam(MessageFields field) {
         return params.isSet(field.getValue());
     }
 
-    public void setParam(ChatFields field, boolean set) {
+    public void setParam(MessageFields field, boolean set) {
         params.setBit(field.getValue(), set);
     }
 
@@ -74,7 +82,7 @@ public class Message extends ChatPacket {
     public byte[] pack() throws IOException {
         PacketWriter pw = new PacketWriter();
         pw.writeBytes(header.pack());
-        
+
         pw.writeByte(params.getValue());
         pw.writeInt(messageId);
         pw.writeInt(persistenceId);
@@ -88,6 +96,7 @@ public class Message extends ChatPacket {
     @Override
     public void unPack(byte[] data) {
         PacketReader pr = new PacketReader(data);
+
         header = new ChatHeader(data);
 
         pr.position(header.getLength());
@@ -100,14 +109,14 @@ public class Message extends ChatPacket {
 
     @Override
     public int getLength() {
-        return header.getLength() + 1 + 4 + 4 + 16 + 2 + message.length;
+        return header.getLength() + LengthCalculator.getLength(this) + message.length;
     }
-    
+
     @Override
     protected PacketType getPacketType() {
         return PacketType.CHAT_MESSAGE;
     }
-    
+
     @Override
     public String toString() {
         StringBuffer buf = new StringBuffer();
@@ -122,7 +131,7 @@ public class Message extends ChatPacket {
         buf.append("\nMessage: ");
         buf.append(new String(message));
         buf.append("\n");
-        
+
         return buf.toString();
     }
 }

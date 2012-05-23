@@ -1,16 +1,24 @@
-package core;
+package net;
 
 import java.io.IOException;
+
+import packets.PacketField;
+import packing.LengthCalculator;
+import packing.Packable;
+import packing.PacketReader;
+import packing.PacketWriter;
+
+import core.PacketType;
 import util.LongInteger;
-import util.Packable;
-import util.PacketReader;
-import util.PacketWriter;
 
 public class ChatHeader implements Packable {
+    @PacketField(size=1)
     private byte version;
+    @PacketField(size=16)
     private LongInteger src;
+    @PacketField(size=1)
     private PacketType type;
-    private byte numExtensions;
+    @PacketField(additional=1)
     private byte[][] extensions;
 
     public ChatHeader(byte[] header) {
@@ -23,12 +31,6 @@ public class ChatHeader implements Packable {
         this.src = src;
         this.type = type;
         this.extensions = extensions;
-
-        if (extensions == null) {
-            this.numExtensions = 0;
-        } else {
-            this.numExtensions = (byte) extensions.length;
-        }
     }
 
     public ChatHeader(byte version, LongInteger src, PacketType type) {
@@ -57,12 +59,15 @@ public class ChatHeader implements Packable {
         pw.writeByte(version);
         pw.writeLongInteger(src);
         pw.writeByte(type.getValue());
-        pw.writeByte(numExtensions);
-        if (numExtensions > 0) {
+        if (extensions != null) {
+            pw.writeByte((byte)extensions.length);
+        
             for (byte[] e : extensions) {
                 pw.writeShort((short) e.length);
                 pw.writeBytes(e);
             }
+        } else {
+            pw.writeByte((byte)0);
         }
         return pw.getArray();
     }
@@ -74,16 +79,18 @@ public class ChatHeader implements Packable {
         src = pr.readLongInteger();
         type = PacketType.fromValue(pr.readByte());
 
-        numExtensions = pr.readByte();
-        extensions = new byte[numExtensions][];
-        for (byte[] b : extensions) {
-            b = pr.readBytes(pr.readShort());
+        int numExt = pr.readByte();
+        if(numExt > 0) {
+            extensions = new byte[numExt][];
+            for (int i = 0; i < extensions.length; i++) {
+                extensions[i] = pr.readBytes(pr.readShort());
+            }
         }
     }
 
     @Override
     public int getLength() {
-        int len = 1 + 16 + 1 + 1;
+        int len = LengthCalculator.getLength(this);
         if (extensions != null) {
             for (byte[] e : extensions) {
                 len += e.length + 2;

@@ -1,8 +1,11 @@
-package util;
+package packing;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+
+import util.BitField;
+import util.LongInteger;
 
 public class PacketWriter {
     private DataOutputStream os;

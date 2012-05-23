@@ -1,6 +1,9 @@
-package util;
+package packing;
 
 import java.nio.ByteBuffer;
+
+import util.BitField;
+import util.LongInteger;
 
 public class PacketReader {
     private ByteBuffer bb;

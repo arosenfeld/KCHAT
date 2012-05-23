@@ -1,6 +1,8 @@
-package core;
+package packets;
 
-import util.Packable;
+import packing.Packable;
+import net.ChatHeader;
+import core.PacketType;
 
 public abstract class ChatPacket implements Packable {
     protected ChatHeader header;
