@@ -8,8 +8,7 @@ import java.util.UUID;
 
 import packets.ChatPacket;
 import packets.ChatPayload;
-import packets.Message;
-import packets.IncomingPacketHandler;
+import packets.ChatMessage;
 import transport.TransportProtocol;
 import util.LongInteger;
 

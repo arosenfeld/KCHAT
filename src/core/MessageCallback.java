@@ -1,7 +1,7 @@
 package core;
 
-import packets.Message;
+import packets.ChatMessage;
 
 public interface MessageCallback {
-    public void receiveMessage(Message message);
+    public void receiveMessage(ChatMessage message);
 }

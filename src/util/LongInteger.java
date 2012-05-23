@@ -49,4 +49,18 @@ public class LongInteger {
         }
         return buf.toString();
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof LongInteger) {
+            byte[] other = ((LongInteger) obj).getValue();
+            for (int i = 0; i < value.length; i++) {
+                if (other[i] != value[i]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
 }

@@ -1,9 +1,12 @@
-package packets;
+package core;
 
+import java.util.Calendar;
+
+import handlers.PacketMatcher;
+import packets.ChatPacket;
 import packets.ChatPacket.PacketType;
 import transport.PacketCallback;
 import util.Logging;
-import core.ChatSocket;
 
 public class IncomingPacketHandler implements PacketCallback {
     private ChatSocket socket;
@@ -13,11 +16,12 @@ public class IncomingPacketHandler implements PacketCallback {
         this.socket = socket;
     }
 
-    public synchronized ChatPacket waitFor(int timeout, PacketType... types) {
+    public synchronized ChatPacket waitFor(int timeout, PacketMatcher matcher) {
         try {
+            long endTime = Calendar.getInstance().getTimeInMillis() + timeout;
             do {
-                wait(timeout);
-            } while (correctType(last.getType(), types));
+                wait(endTime - Calendar.getInstance().getTimeInMillis());
+            } while (matcher.matches(last));
             return last;
         } catch (InterruptedException e) {
             Logging.getLogger().warning("Wait was interrupted.");
@@ -27,14 +31,5 @@ public class IncomingPacketHandler implements PacketCallback {
 
     @Override
     public synchronized void processPacket(byte[] data) {
-    }
-
-    private boolean correctType(PacketType received, PacketType[] waiting) {
-        for (PacketType t : waiting) {
-            if (t == received) {
-                return true;
-            }
-        }
-        return false;
     }
 }

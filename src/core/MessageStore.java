@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import packets.ChatPacket;
-import packets.Message;
+import packets.ChatMessage;
 import packets.ChatPacket.PacketType;
 
 import util.LongInteger;
@@ -24,7 +24,7 @@ public class MessageStore {
                 messages.put(m.getSrc(),
                         (TreeMap<Integer, ChatPacket>) Collections.synchronizedMap(new TreeMap<Integer, ChatPacket>()));
             }
-            messages.get(m.getSrc()).put(((Message) m.getPayload()).getPersistenceId(), m);
+            messages.get(m.getSrc()).put(((ChatMessage) m.getPayload()).getPersistenceId(), m);
         }
     }
 }

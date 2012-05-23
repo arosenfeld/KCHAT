@@ -11,7 +11,7 @@ import util.LengthCalculator;
 import util.LongInteger;
 import util.PacketField;
 
-public class Message implements ChatPayload {
+public class ChatMessage implements ChatPayload {
     public enum MessageFields {
         TO_ROOM((byte) 0), PERSIST((byte) 1);
 
@@ -37,12 +37,12 @@ public class Message implements ChatPayload {
     @PacketField(additional = 2)
     private byte[] message;
 
-    public Message(byte[] data) {
+    public ChatMessage(byte[] data) {
         this.params = new BitField();
         unPack(data);
     }
 
-    public Message(int messageId, int persistenceId, LongInteger dest, byte[] message) {
+    public ChatMessage(int messageId, int persistenceId, LongInteger dest, byte[] message) {
         this.params = new BitField();
         this.messageId = messageId;
         this.persistenceId = persistenceId;
