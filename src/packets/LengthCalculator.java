@@ -1,8 +1,8 @@
-package packing;
+package packets;
 
 import java.lang.reflect.Field;
 
-import packets.PacketField;
+import packing.Packable;
 
 
 public class LengthCalculator {

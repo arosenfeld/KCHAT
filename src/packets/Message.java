@@ -2,7 +2,6 @@ package packets;
 
 import java.io.IOException;
 
-import packing.LengthCalculator;
 import packing.PacketReader;
 import packing.PacketWriter;
 
