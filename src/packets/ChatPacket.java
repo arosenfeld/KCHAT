@@ -41,6 +41,8 @@ public class ChatPacket implements Packable {
     private LongInteger src;
     @PacketField(size = 1)
     private PacketType type;
+    @PacketField(size = 4)
+    private int sequence;
     @PacketField(additional = 1)
     private byte[][] extensions;
     private ChatPayload payload;
@@ -49,20 +51,25 @@ public class ChatPacket implements Packable {
         unPack(data);
     }
 
-    public ChatPacket(byte version, LongInteger src, ChatPayload payload, byte[][] extensions) {
+    public ChatPacket(byte version, int sequence, LongInteger src, ChatPayload payload, byte[][] extensions) {
         this.version = version;
+        this.sequence = sequence;
         this.src = src;
         this.type = payload.getType();
         this.extensions = extensions;
         this.payload = payload;
     }
 
-    public ChatPacket(byte version, LongInteger src, ChatPayload payload) {
-        this(version, src, payload, null);
+    public ChatPacket(byte version, int sequence, LongInteger src, ChatPayload payload) {
+        this(version, sequence, src, payload, null);
     }
 
     public byte getVersion() {
         return version;
+    }
+
+    public int getSequence() {
+        return sequence;
     }
 
     public LongInteger getSrc() {
@@ -87,6 +94,7 @@ public class ChatPacket implements Packable {
         pw.writeByte(version);
         pw.writeLongInteger(src);
         pw.writeByte(type.getValue());
+        pw.writeInt(sequence);
         if (extensions != null) {
             pw.writeByte((byte) extensions.length);
 
@@ -107,6 +115,7 @@ public class ChatPacket implements Packable {
         version = pr.readByte();
         src = pr.readLongInteger();
         type = PacketType.fromValue(pr.readByte());
+        sequence = pr.readInt();
 
         int numExt = pr.readByte();
         if (numExt > 0) {
@@ -135,8 +144,9 @@ public class ChatPacket implements Packable {
         sb.append("\nVersion: " + version + "\n");
         sb.append("Src: " + src.toString() + "\n");
         sb.append("Type: " + type.toString() + "\n");
+        sb.append("Seq: " + sequence + "\n");
         sb.append("Payload: \n\n" + payload.toString() + "\n");
-        
+
         return sb.toString();
     }
 }

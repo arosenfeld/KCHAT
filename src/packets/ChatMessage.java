@@ -29,8 +29,6 @@ public class ChatMessage implements ChatPayload {
     @PacketField(size = 1)
     private BitField params;
     @PacketField(size = 4)
-    private int messageId;
-    @PacketField(size = 4)
     private int persistenceId;
     @PacketField(size = 16)
     private LongInteger dest;
@@ -42,16 +40,11 @@ public class ChatMessage implements ChatPayload {
         unPack(data);
     }
 
-    public ChatMessage(int messageId, int persistenceId, LongInteger dest, byte[] message) {
+    public ChatMessage(int persistenceId, LongInteger dest, byte[] message) {
         this.params = new BitField();
-        this.messageId = messageId;
         this.persistenceId = persistenceId;
         this.dest = dest;
         this.message = message;
-    }
-
-    public int getMessageId() {
-        return messageId;
     }
 
     public int getPersistenceId() {
@@ -79,7 +72,6 @@ public class ChatMessage implements ChatPayload {
         PacketWriter pw = new PacketWriter();
 
         pw.writeByte(params.getValue());
-        pw.writeInt(messageId);
         pw.writeInt(persistenceId);
         pw.writeLongInteger(dest);
         pw.writeShort((short) message.length);
@@ -92,7 +84,6 @@ public class ChatMessage implements ChatPayload {
     public void unPack(byte[] data) {
         PacketReader pr = new PacketReader(data);
         params = pr.readBitField();
-        messageId = pr.readInt();
         persistenceId = pr.readInt();
         dest = pr.readLongInteger();
         message = pr.readBytes(pr.readShort());
@@ -113,8 +104,6 @@ public class ChatMessage implements ChatPayload {
         StringBuffer buf = new StringBuffer();
         buf.append("Params: ");
         buf.append(params.toString());
-        buf.append("\nMessageId: ");
-        buf.append(messageId);
         buf.append("\nPersistenceId: ");
         buf.append(persistenceId);
         buf.append("\nDest: ");

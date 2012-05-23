@@ -26,7 +26,7 @@ public class SendUserMessage extends Handler {
     @Override
     public void invoke(ChatSocket socket) throws InvalidCommandException {
         sentMessageId = socket.getNextId();
-        ChatMessage m = new ChatMessage(sentMessageId, persist ? socket.getNextPersistId() : 0, dest, message);
+        ChatMessage m = new ChatMessage(persist ? socket.getNextPersistId() : 0, dest, message);
         ChatPacket outgoing = socket.wrapPayload(m);
         ChatPacket received;
         synchronized (socket.getIncomingPacketHandler()) {

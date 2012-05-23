@@ -70,7 +70,7 @@ public class ChatSocket {
     }
 
     public ChatPacket wrapPayload(ChatPayload pld) {
-        return new ChatPacket(version, uuid, pld);
+        return new ChatPacket(version, getNextId(), uuid, pld);
     }
 
     public void executeCommand(Handler cmd) throws InvalidCommandException {

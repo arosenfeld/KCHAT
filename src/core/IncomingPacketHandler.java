@@ -32,4 +32,8 @@ public class IncomingPacketHandler implements PacketCallback {
     @Override
     public synchronized void processPacket(byte[] data) {
     }
+    
+    private class DuplicateFilter {
+        //private Set
+    }
 }
