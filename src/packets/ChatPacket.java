@@ -115,7 +115,7 @@ public class ChatPacket implements Packable {
                 extensions[i] = pr.readBytes(pr.readShort());
             }
         }
-        // TODO: Unpack payload
+        payload = ChatPayloadCreator.createPayload(type, pr.getRemainder());
     }
 
     @Override
@@ -127,5 +127,16 @@ public class ChatPacket implements Packable {
             }
         }
         return len;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\nVersion: " + version + "\n");
+        sb.append("Src: " + src.toString() + "\n");
+        sb.append("Type: " + type.toString() + "\n");
+        sb.append("Payload: \n\n" + payload.toString() + "\n");
+        
+        return sb.toString();
     }
 }
