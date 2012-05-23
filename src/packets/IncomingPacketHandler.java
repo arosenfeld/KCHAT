@@ -1,9 +1,9 @@
 package packets;
 
 import packets.ChatPacket.PacketType;
+import transport.PacketCallback;
 import util.Logging;
 import core.ChatSocket;
-import net.PacketCallback;
 
 public class IncomingPacketHandler implements PacketCallback {
     private ChatSocket socket;

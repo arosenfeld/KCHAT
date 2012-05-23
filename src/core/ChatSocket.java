@@ -6,11 +6,11 @@ import handlers.InvalidCommandException;
 import java.io.IOException;
 import java.util.UUID;
 
-import net.TransportProtocol;
 import packets.ChatPacket;
 import packets.ChatPayload;
 import packets.Message;
 import packets.IncomingPacketHandler;
+import transport.TransportProtocol;
 import util.LongInteger;
 
 public class ChatSocket {

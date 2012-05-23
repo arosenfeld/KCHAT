@@ -1,4 +1,4 @@
-package net;
+package transport;
 
 /**
  * Callback interface for classes which process packets.
