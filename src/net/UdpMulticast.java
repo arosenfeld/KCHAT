@@ -74,10 +74,7 @@ public class UdpMulticast extends TransportProtocol {
                 byte[] buf = new byte[MAX_LENGTH];
                 DatagramPacket p = new DatagramPacket(buf, buf.length);
                 socket.receive(p);
-                // NOTE: This should prevent loopback, but may not be optimal.
-                if (!p.getAddress().equals(InetAddress.getLocalHost())) {
-                    cb.processPacket(p.getData());
-                }
+                cb.processPacket(p.getData());
             } catch (Exception ex) {
                 ex.printStackTrace();
             }

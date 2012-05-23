@@ -35,7 +35,7 @@ public class Logging {
             sb.append(": ");
             sb.append(record.getMessage());
             sb.append("\n");
-            
+
             return sb.toString();
         }
     }

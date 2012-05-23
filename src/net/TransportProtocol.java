@@ -14,8 +14,7 @@ public abstract class TransportProtocol extends Thread {
     protected int port;
     protected PacketCallback cb;
 
-    public TransportProtocol(String iface, String host, int port)
-            throws UnknownHostException {
+    public TransportProtocol(String iface, String host, int port) throws UnknownHostException {
         this.iface = iface;
         this.address = InetAddress.getByName(host);
         this.port = port;

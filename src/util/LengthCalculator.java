@@ -1,9 +1,8 @@
-package packets;
+package util;
 
 import java.lang.reflect.Field;
 
 import packing.Packable;
-
 
 public class LengthCalculator {
     public static final int getLength(Packable p) {

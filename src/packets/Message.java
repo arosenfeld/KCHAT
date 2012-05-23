@@ -2,15 +2,16 @@ package packets;
 
 import java.io.IOException;
 
+import packets.ChatPacket.PacketType;
 import packing.PacketReader;
 import packing.PacketWriter;
 
-import net.ChatHeader;
-
 import util.BitField;
+import util.LengthCalculator;
 import util.LongInteger;
+import util.PacketField;
 
-public class Message extends ChatPacket {
+public class Message implements ChatPayload {
     public enum MessageFields {
         TO_ROOM((byte) 0), PERSIST((byte) 1);
 
@@ -25,26 +26,23 @@ public class Message extends ChatPacket {
         }
     }
 
-    @PacketField(size=1)
+    @PacketField(size = 1)
     private BitField params;
-    @PacketField(size=4)
+    @PacketField(size = 4)
     private int messageId;
-    @PacketField(size=4)
+    @PacketField(size = 4)
     private int persistenceId;
-    @PacketField(size=16)
+    @PacketField(size = 16)
     private LongInteger dest;
-    @PacketField(additional=2)
+    @PacketField(additional = 2)
     private byte[] message;
 
     public Message(byte[] data) {
-        super(new ChatHeader(data));
         this.params = new BitField();
         unPack(data);
     }
 
-    public Message(ChatHeader header, int messageId, int persistenceId,
-            LongInteger dest, byte[] message) {
-        super(header);
+    public Message(int messageId, int persistenceId, LongInteger dest, byte[] message) {
         this.params = new BitField();
         this.messageId = messageId;
         this.persistenceId = persistenceId;
@@ -79,7 +77,6 @@ public class Message extends ChatPacket {
     @Override
     public byte[] pack() throws IOException {
         PacketWriter pw = new PacketWriter();
-        pw.writeBytes(header.pack());
 
         pw.writeByte(params.getValue());
         pw.writeInt(messageId);
@@ -94,10 +91,6 @@ public class Message extends ChatPacket {
     @Override
     public void unPack(byte[] data) {
         PacketReader pr = new PacketReader(data);
-
-        header = new ChatHeader(data);
-
-        pr.position(header.getLength());
         params = pr.readBitField();
         messageId = pr.readInt();
         persistenceId = pr.readInt();
@@ -107,11 +100,11 @@ public class Message extends ChatPacket {
 
     @Override
     public int getLength() {
-        return header.getLength() + LengthCalculator.getLength(this) + message.length;
+        return LengthCalculator.getLength(this) + message.length;
     }
 
     @Override
-    protected PacketType getPacketType() {
+    public PacketType getType() {
         return PacketType.CHAT_MESSAGE;
     }
 
