@@ -41,7 +41,7 @@ public class PacketReader {
     public void position(int i) {
         bb.position(i);
     }
-    
+
     public byte[] getRemainder() {
         return readBytes(bb.capacity() - bb.position());
     }

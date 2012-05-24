@@ -139,6 +139,24 @@ public class ChatPacket implements Packable {
     }
 
     @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof ChatPacket) {
+            ChatPacket other = (ChatPacket) obj;
+            if (other.getSrc().equals(getSrc()) && other.getSequence() == getSequence()
+                    && other.getType().equals(getType())) {
+
+                // TODO: This is a bit hacky...
+                if (getType() == PacketType.CHAT_MESSAGE) {
+                    return ((ChatMessage) other.getPayload()).getPersistenceId() == ((ChatMessage) getPayload())
+                            .getPersistenceId();
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("\nVersion: " + version + "\n");

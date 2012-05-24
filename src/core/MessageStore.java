@@ -21,8 +21,8 @@ public class MessageStore {
     public void addMessage(ChatPacket m) {
         if (m.getType() == PacketType.CHAT_MESSAGE) {
             if (!messages.containsKey(m.getSrc())) {
-                messages.put(m.getSrc(),
-                        (TreeMap<Integer, ChatPacket>) Collections.synchronizedMap(new TreeMap<Integer, ChatPacket>()));
+                messages.put(m.getSrc(), (TreeMap<Integer, ChatPacket>) Collections
+                        .synchronizedMap(new TreeMap<Integer, ChatPacket>()));
             }
             messages.get(m.getSrc()).put(((ChatMessage) m.getPayload()).getPersistenceId(), m);
         }

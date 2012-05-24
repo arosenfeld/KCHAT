@@ -12,12 +12,12 @@ import util.LongInteger;
 import util.PacketField;
 
 public class ChatMessage implements ChatPayload {
-    public enum MessageFields {
+    public enum MessageField {
         TO_ROOM((byte) 0), PERSIST((byte) 1);
 
         private byte index;
 
-        MessageFields(byte index) {
+        MessageField(byte index) {
             this.index = index;
         }
 
@@ -47,6 +47,10 @@ public class ChatMessage implements ChatPayload {
         this.message = message;
     }
 
+    public ChatMessage(LongInteger dest, byte[] message) {
+        this(0, dest, message);
+    }
+
     public int getPersistenceId() {
         return persistenceId;
     }
@@ -59,11 +63,11 @@ public class ChatMessage implements ChatPayload {
         return message;
     }
 
-    public boolean getParam(MessageFields field) {
+    public boolean getParam(MessageField field) {
         return params.isSet(field.getValue());
     }
 
-    public void setParam(MessageFields field, boolean set) {
+    public void setParam(MessageField field, boolean set) {
         params.setBit(field.getValue(), set);
     }
 

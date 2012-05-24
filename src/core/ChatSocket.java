@@ -9,6 +9,8 @@ import java.util.UUID;
 import packets.ChatPacket;
 import packets.ChatPayload;
 import packets.ChatMessage;
+import packets.ChatMessage.MessageField;
+import packets.ChatPacket.PacketType;
 import transport.TransportProtocol;
 import util.LongInteger;
 

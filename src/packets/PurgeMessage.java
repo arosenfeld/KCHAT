@@ -35,7 +35,7 @@ public class PurgeMessage implements ChatPayload {
     @Override
     public void unPack(byte[] data) {
         PacketReader pr = new PacketReader(data);
-        
+
         messageId = pr.readInt();
     }
 
@@ -47,13 +47,13 @@ public class PurgeMessage implements ChatPayload {
     @Override
     public PacketType getType() {
         return PacketType.PURGE;
-    } 
+    }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Message ID: " + messageId);
-        
+
         return sb.toString();
     }
 }

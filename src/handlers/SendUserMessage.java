@@ -5,7 +5,7 @@ import java.io.IOException;
 import packets.ChatPacket;
 import packets.ChatMessage;
 import packets.ChatPacket.PacketType;
-import packets.ChatMessage.MessageFields;
+import packets.ChatMessage.MessageField;
 import packets.PurgeMessage;
 import util.Logging;
 import util.LongInteger;
@@ -26,13 +26,12 @@ public class SendUserMessage extends Handler {
     @Override
     public void invoke(ChatSocket socket) throws InvalidCommandException {
         sentMessageId = socket.getNextId();
-        ChatMessage m = new ChatMessage(persist ? socket.getNextPersistId() : 0, dest, message);
-        ChatPacket outgoing = socket.wrapPayload(m);
         ChatPacket received;
         synchronized (socket.getIncomingPacketHandler()) {
             try {
                 // Send the message
-                socket.sendPacket(outgoing);
+                socket.sendPacket(socket.wrapPayload(new ChatMessage(dest, message)));
+                Logging.getLogger().info("Sent message");
 
                 // Wait for a purge message
                 // TODO: Use GRTT in this wait
@@ -41,8 +40,10 @@ public class SendUserMessage extends Handler {
                 // If no purge received and message is persistent, resend as
                 // persistent
                 if (persist && received == null) {
-                    m.setParam(MessageFields.PERSIST, true);
-                    socket.sendPacket(outgoing);
+                    Logging.getLogger().info("Persist set and no response received.");
+                    ChatMessage resendPersistent = new ChatMessage(socket.getNextPersistId(), dest, message);
+                    resendPersistent.setParam(MessageField.PERSIST, true);
+                    socket.sendPacket(socket.wrapPayload(resendPersistent));
                 }
             } catch (IOException e) {
                 Logging.getLogger().warning("Unable to send user message");
