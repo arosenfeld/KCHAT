@@ -6,6 +6,7 @@ import packets.ChatPacket.PacketType;
 import packing.PacketReader;
 import packing.PacketWriter;
 import util.LengthCalculator;
+import util.Logging;
 import util.PacketField;
 
 public class PurgeMessage implements ChatPayload {
@@ -34,6 +35,7 @@ public class PurgeMessage implements ChatPayload {
     @Override
     public void unPack(byte[] data) {
         PacketReader pr = new PacketReader(data);
+        
         messageId = pr.readInt();
     }
 

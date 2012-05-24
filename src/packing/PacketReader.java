@@ -43,6 +43,6 @@ public class PacketReader {
     }
     
     public byte[] getRemainder() {
-        return bb.slice().array();
+        return readBytes(bb.capacity() - bb.position());
     }
 }

@@ -24,7 +24,6 @@ public class Main {
         Logging.getLogger().info(packet.toString());
         byte[] packed = packet.pack();
         ChatPacket packet2 = new ChatPacket(packed);
-        Logging.getLogger().info("----------------------------");
-        Logging.getLogger().info(packet.toString());
+        Logging.getLogger().info("----------------------------\n" + packet2.toString());
     }
 }
