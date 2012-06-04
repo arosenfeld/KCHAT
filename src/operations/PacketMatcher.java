@@ -1,4 +1,4 @@
-package handlers;
+package operations;
 
 import packets.ChatPacket;
 import packets.ChatPacket.PacketType;

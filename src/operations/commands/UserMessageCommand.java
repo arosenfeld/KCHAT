@@ -1,6 +1,8 @@
-package handlers;
+package operations.commands;
 
 import java.io.IOException;
+
+import operations.PacketMatcher;
 
 import packets.ChatPacket;
 import packets.ChatMessage;
@@ -11,13 +13,13 @@ import util.Logging;
 import util.LongInteger;
 import core.ChatSocket;
 
-public class SendUserMessage extends Handler {
+public class UserMessageCommand extends Command {
     private LongInteger dest;
     private byte[] message;
     private boolean persist;
     private int sentMessageId;
 
-    public SendUserMessage(LongInteger dest, byte[] message, boolean persist) {
+    public UserMessageCommand(LongInteger dest, byte[] message, boolean persist) {
         this.dest = dest;
         this.message = message;
         this.persist = persist;
@@ -25,25 +27,26 @@ public class SendUserMessage extends Handler {
 
     @Override
     public void invoke(ChatSocket socket) throws InvalidCommandException {
-        sentMessageId = socket.getNextId();
+        sentMessageId = socket.getNextSeq();
         ChatPacket received;
-        synchronized (socket.getIncomingPacketHandler()) {
+        synchronized (socket) {
             try {
+                ChatMessage msg = new ChatMessage(socket.getNextMessageId(), dest, message);
                 // Send the message
-                socket.sendPacket(socket.wrapPayload(new ChatMessage(dest, message)));
+                socket.sendPacket(socket.wrapPayload(msg));
                 Logging.getLogger().info("Sent message");
 
                 // Wait for a purge message
                 // TODO: Use GRTT in this wait
-                received = socket.getIncomingPacketHandler().waitFor(1000, new PurgeMatcher());
+                received = socket.waitFor(1000, new PurgeMatcher());
 
                 // If no purge received and message is persistent, resend as
                 // persistent
                 if (persist && received == null) {
                     Logging.getLogger().info("Persist set and no response received.");
-                    ChatMessage resendPersistent = new ChatMessage(socket.getNextPersistId(), dest, message);
-                    resendPersistent.setParam(MessageField.PERSIST, true);
-                    socket.sendPacket(socket.wrapPayload(resendPersistent));
+                    msg.setParam(MessageField.PERSIST, true);
+                    msg.setPersistenceId(socket.getNextPersistId());
+                    socket.sendPacket(socket.wrapPayload(msg));
                 }
             } catch (IOException e) {
                 Logging.getLogger().warning("Unable to send user message");

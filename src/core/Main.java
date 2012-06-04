@@ -1,6 +1,6 @@
 package core;
 
-import handlers.SendUserMessage;
+import operations.commands.UserMessageCommand;
 import packets.ChatPacket;
 import packets.PurgeMessage;
 import transport.UdpMulticast;
@@ -18,10 +18,16 @@ public class Main {
 
         ChatSocket sock = new ChatSocket(new UdpMulticast(Configuration.getInstance().getValueAsString("udp.iface"),
                 Configuration.getInstance().getValueAsString("udp.host"), Configuration.getInstance().getValueAsInt(
-                        "udp.port")), null);
+                        "udp.port")), new ChatPacketCallback() {
+
+            @Override
+            public void receivePacket(ChatPacket message) {
+                Logging.getLogger().info("CLIENT RECEIVED A MESSAGE");
+            }
+        });
         sock.start();
 
-        sock.executeCommand(new SendUserMessage(new LongInteger("Someone".getBytes()), "This is a test".getBytes(),
+        sock.executeCommand(new UserMessageCommand(new LongInteger("Someone".getBytes()), "This is a test".getBytes(),
                 true));
 
         // PurgeMessage pm = new PurgeMessage(12345);

@@ -144,12 +144,6 @@ public class ChatPacket implements Packable {
             ChatPacket other = (ChatPacket) obj;
             if (other.getSrc().equals(getSrc()) && other.getSequence() == getSequence()
                     && other.getType().equals(getType())) {
-
-                // TODO: This is a bit hacky...
-                if (getType() == PacketType.CHAT_MESSAGE) {
-                    return ((ChatMessage) other.getPayload()).getPersistenceId() == ((ChatMessage) getPayload())
-                            .getPersistenceId();
-                }
                 return true;
             }
         }

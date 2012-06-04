@@ -1,6 +1,7 @@
 package util;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.UUID;
 
 public class LongInteger {
@@ -62,5 +63,12 @@ public class LongInteger {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 71 * hash + Arrays.hashCode(this.value);
+        return hash;
     }
 }
