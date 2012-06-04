@@ -5,6 +5,7 @@ import operations.commands.Command;
 import operations.commands.InvalidCommandException;
 import operations.handlers.Handler;
 import operations.handlers.ChatMessageHandler;
+import operations.handlers.PresenceHandler;
 
 import java.io.IOException;
 import java.util.Calendar;
@@ -23,8 +24,9 @@ import util.LongInteger;
 public class ChatSocket implements PacketCallback {
     private TransportProtocol protocol;
     private MessageStore messageStore;
+    private PresenceManager presenceManager;
+
     private ChatPacketCallback clientCallback;
-    private boolean loopback;
     private List<Handler> handlers;
 
     private LongInteger uuid;
@@ -42,7 +44,8 @@ public class ChatSocket implements PacketCallback {
         this.version = version;
         this.nextSeqId = 0;
         this.nextPersistId = 0;
-        this.loopback = false;
+
+        this.presenceManager = new PresenceManager();
 
         this.protocol = protocol;
         this.protocol.setCallback(this);
@@ -56,17 +59,27 @@ public class ChatSocket implements PacketCallback {
         this.handlers = new LinkedList<Handler>();
     }
 
+    public ChatSocket(TransportProtocol protocol, ChatPacketCallback callback, LongInteger uuid) {
+        this(protocol, callback, uuid, (byte) 1);
+    }
+
     public ChatSocket(TransportProtocol protocol, ChatPacketCallback callback) {
         this(protocol, callback, new LongInteger(UUID.randomUUID()), (byte) 1);
     }
 
     public void start() {
         this.handlers.add(new ChatMessageHandler());
+        this.handlers.add(new PresenceHandler());
+
         this.protocol.start();
     }
 
     public void stop() {
         this.protocol.close();
+    }
+
+    public PresenceManager getPresenceManager() {
+        return presenceManager;
     }
 
     public TransportProtocol getTransport() {
@@ -131,15 +144,18 @@ public class ChatSocket implements PacketCallback {
     public synchronized void processPacket(byte[] data) {
         ChatPacket packet = new ChatPacket(data);
         if (!duplicates.heard(packet) && !packet.getSrc().equals(uuid)) {
-            duplicates.add(packet);
-            last = packet;
-            notifyAll();
-            Logging.getLogger().info("Received packet of type " + packet.getType());
+            if (packet.getPayload() != null && packet.getPayload().getType() == packet.getType()) {
+                duplicates.add(packet);
+                last = packet;
+                notifyAll();
 
-            for (Handler h : handlers) {
-                if (h.accepts(packet)) {
-                    h.process(this, packet);
+                for (Handler h : handlers) {
+                    if (h.accepts(packet)) {
+                        h.process(this, packet);
+                    }
                 }
+            } else {
+                Logging.getLogger().warning("Invalid payload.  Message ignored.");
             }
         }
     }

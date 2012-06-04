@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.MulticastSocket;
 import java.net.NetworkInterface;
+import java.net.SocketException;
 
 /**
  * Wrapper for MulticastSocket. Provides simple multicast send/recv
@@ -72,8 +73,11 @@ public class UdpMulticast extends TransportProtocol {
             try {
                 byte[] buf = new byte[MAX_LENGTH];
                 DatagramPacket p = new DatagramPacket(buf, buf.length);
-                socket.receive(p);
-                cb.processPacket(p.getData());
+                try {
+                    socket.receive(p);
+                    cb.processPacket(p.getData());
+                } catch(SocketException e) {
+                }
             } catch (Exception ex) {
                 ex.printStackTrace();
             }

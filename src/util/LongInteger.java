@@ -18,6 +18,10 @@ public class LongInteger {
         setValue(setValue);
     }
 
+    public LongInteger(String value) {
+        this(value.getBytes());
+    }
+
     public LongInteger() {
         value = new byte[16];
     }
@@ -43,6 +47,10 @@ public class LongInteger {
 
     @Override
     public String toString() {
+        return new String(value);
+    }
+
+    public String asRaw() {
         StringBuffer buf = new StringBuffer();
         for (byte b : value) {
             buf.append(b);

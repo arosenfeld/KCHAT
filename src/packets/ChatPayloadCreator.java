@@ -10,6 +10,8 @@ public class ChatPayloadCreator {
             return new ChatMessage(packedPayload);
         case PURGE:
             return new PurgeMessage(packedPayload);
+        case USER_PRESENCE:
+            return new UserPresenceMessage(packedPayload);
         default:
             return null;
         }

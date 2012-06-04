@@ -32,8 +32,6 @@ public class ChatMessageHandler extends Handler {
     @Override
     public void process(ChatSocket sock, ChatPacket packet) {
         ChatMessage msg = (ChatMessage) packet.getPayload();
-        Logging.getLogger().info(
-                "Chat Message handler passed a message " + packet.getSequence() + "," + msg.getPersistenceId());
         if (msg.getParam(MessageField.TO_ROOM) || msg.getDest().equals(sock.getUUID())) {
             if (msg.getDest().equals(sock.getUUID())) {
                 try {
