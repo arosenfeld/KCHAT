@@ -24,6 +24,14 @@ public class RoomStatusMessage implements ChatPayload {
         this.roomName = roomName;
         this.members = members;
     }
+    
+    public LongInteger getRoomName() {
+        return roomName;
+    }
+    
+    public LongInteger[] getMembers() {
+        return members;
+    }
 
     @Override
     public byte[] pack() throws IOException {
