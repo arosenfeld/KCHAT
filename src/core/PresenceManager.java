@@ -28,8 +28,29 @@ public class PresenceManager {
         }
     }
 
+    public LongInteger[] membersOf(LongInteger room) {
+        if (!presences.containsKey(room) || presences.get(room).size() == 0) {
+            return new LongInteger[0];
+        }
+
+        return presences.get(room).toArray(new LongInteger[presences.get(room).size()]);
+    }
+
     public boolean isPresent(LongInteger room, LongInteger user) {
         return presences.containsKey(room) && presences.get(room).contains(user);
+    }
+
+    public LongInteger hashMembers(LongInteger roomName) {
+        LongInteger hash = new LongInteger();
+        if (!presences.containsKey(roomName)) {
+            return hash;
+        }
+
+        for (LongInteger m : presences.get(roomName)) {
+            hash.xorWith(m);
+        }
+
+        return hash;
     }
 
     @Override

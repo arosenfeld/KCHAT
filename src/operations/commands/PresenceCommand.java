@@ -2,8 +2,8 @@ package operations.commands;
 
 import java.io.IOException;
 
-import packets.UserPresenceMessage;
-import packets.UserPresenceMessage.PresenceStatus;
+import packets.messages.UserPresenceMessage;
+import packets.messages.UserPresenceMessage.PresenceStatus;
 import util.LongInteger;
 import core.ChatSocket;
 

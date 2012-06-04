@@ -41,13 +41,14 @@ public class LongInteger {
         }
     }
 
-    public byte[] getValue() {
-        return value;
+    public void xorWith(LongInteger other) {
+        for (int i = 0; i < value.length; i++) {
+            value[i] ^= other.getValue()[i];
+        }
     }
 
-    @Override
-    public String toString() {
-        return new String(value);
+    public byte[] getValue() {
+        return value;
     }
 
     public String asRaw() {
@@ -57,6 +58,11 @@ public class LongInteger {
             buf.append(" ");
         }
         return buf.toString();
+    }
+
+    @Override
+    public String toString() {
+        return new String(value);
     }
 
     @Override

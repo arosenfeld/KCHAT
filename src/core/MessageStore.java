@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import packets.ChatPacket;
-import packets.ChatMessage;
 import packets.ChatPacket.PacketType;
+import packets.messages.ChatMessage;
 
 import util.LongInteger;
 

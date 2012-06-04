@@ -10,10 +10,10 @@ import operations.commands.InvalidCommandException;
 import operations.commands.PurgeCommand;
 
 import core.ChatSocket;
-import packets.ChatMessage;
 import packets.ChatPacket;
-import packets.ChatMessage.MessageField;
 import packets.ChatPacket.PacketType;
+import packets.messages.ChatMessage;
+import packets.messages.ChatMessage.MessageField;
 import util.Logging;
 import util.LongInteger;
 

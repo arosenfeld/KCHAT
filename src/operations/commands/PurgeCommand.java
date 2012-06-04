@@ -2,7 +2,7 @@ package operations.commands;
 
 import java.io.IOException;
 
-import packets.PurgeMessage;
+import packets.messages.PurgeMessage;
 import core.ChatSocket;
 
 public class PurgeCommand extends Command {

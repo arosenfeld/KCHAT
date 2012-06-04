@@ -3,14 +3,15 @@ package core;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 
 import operations.commands.InvalidCommandException;
 import operations.commands.PresenceCommand;
 import operations.commands.UserMessageCommand;
 import packets.ChatPacket;
-import packets.PurgeMessage;
-import packets.UserPresenceMessage;
-import packets.UserPresenceMessage.PresenceStatus;
+import packets.messages.PurgeMessage;
+import packets.messages.UserPresenceMessage;
+import packets.messages.UserPresenceMessage.PresenceStatus;
 import transport.UdpMulticast;
 import util.Configuration;
 import util.Logging;
@@ -49,7 +50,8 @@ public class Main {
 
                     @Override
                     public void receivePacket(ChatPacket message) {
-                        System.out.println("! Received Message from " + message.getSrc());
+                        System.out.println("! Received Packet " + message);
+                        System.out.println("----------------------------");
                     }
                 }, new LongInteger(cmdLine.readLine()));
         System.out.println("Starting socket with ID " + sock.getUUID());
@@ -57,10 +59,10 @@ public class Main {
     }
 
     private static void handleCommand(String input) throws Exception {
+        String[] split = input.split(" ");
         if (input.equals("rooms")) {
             System.out.println(sock.getPresenceManager());
         } else if (input.startsWith("status")) {
-            String[] split = input.split(" ");
             if (split.length == 3 && (split[2].equals("join") || split[2].equals("leave"))) {
                 try {
                     sock.executeCommand(new PresenceCommand(new LongInteger(input.split(" ")[1]), split[2]
@@ -71,13 +73,22 @@ public class Main {
             } else {
                 System.out.println("Invalid: Must specify a room name and join/leave.");
             }
+        } else if (input.startsWith("msg-user")) {
+            if (split.length >= 3) {
+                boolean persist = split[2].toUpperCase().equals("Y");
+                int msgOffset = split[0].length() + split[1].length() + split[2].length() + 3;
+                sock.executeCommand(new UserMessageCommand(new LongInteger(split[1]), input.substring(msgOffset)
+                        .getBytes(), persist));
+            }
+        } else if(input.equals("exit")) {
         } else {
             System.out.println("Commands:");
-            System.out.println("\tstatus <room> <join|leave> : Joins/leaves <room>");
-            System.out.println("\tmsg-user <user> <msg>      : Sends <user> the message <msg>");
-            System.out.println("\trooms                      : Lists rooms and members");
-            System.out.println("\thelp                       : Prints this help message");
-            System.out.println("\texit                       : Closes the socket and exits the driver");
+            System.out.println("\tstatus <room> <join|leave>      : Joins/leaves <room>");
+            System.out
+                    .println("\tmsg-user <user> <persist> <msg> : Sends <user> the message <msg>.  If [persist] equals 'Y', it will be sent persistently");
+            System.out.println("\trooms                           : Lists rooms and members");
+            System.out.println("\thelp                            : Prints this help message");
+            System.out.println("\texit                            : Closes the socket and exits the driver");
         }
     }
 }

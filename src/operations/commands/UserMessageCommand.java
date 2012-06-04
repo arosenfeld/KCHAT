@@ -5,10 +5,10 @@ import java.io.IOException;
 import operations.PacketMatcher;
 
 import packets.ChatPacket;
-import packets.ChatMessage;
 import packets.ChatPacket.PacketType;
-import packets.ChatMessage.MessageField;
-import packets.PurgeMessage;
+import packets.messages.ChatMessage;
+import packets.messages.PurgeMessage;
+import packets.messages.ChatMessage.MessageField;
 import util.Logging;
 import util.LongInteger;
 import core.ChatSocket;
