@@ -22,6 +22,10 @@ public class PresenceManager {
         presences = Collections.synchronizedMap(new HashMap<LongInteger, Room>());
     }
 
+    public LongInteger[] getRooms() {
+        return presences.keySet().toArray(new LongInteger[presences.size()]);
+    }
+
     public synchronized void setPresence(LongInteger room, LongInteger user, boolean present) {
         if (!presences.containsKey(room)) {
             presences.put(room, new Room(room));

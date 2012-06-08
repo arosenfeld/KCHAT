@@ -36,7 +36,6 @@ public class PresenceHandler extends Handler {
 
     @Override
     public void process(ChatSocket sock, ChatPacket packet) {
-        // Logging.getLogger().info("PH got " + packet.getType());
         switch (packet.getType()) {
         case USER_PRESENCE:
             handleUserPresence(sock, packet);

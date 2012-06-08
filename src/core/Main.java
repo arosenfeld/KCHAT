@@ -10,7 +10,6 @@ import operations.commands.UserMessageCommand;
 import packets.ChatPacket;
 import transport.UdpMulticast;
 import util.Configuration;
-import util.Logging;
 import util.LongInteger;
 
 public class Main {
