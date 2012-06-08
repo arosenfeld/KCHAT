@@ -1,56 +1,102 @@
 package core;
 
+import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 import java.util.Map;
 
+import packets.messages.RoomComparisonMessage;
+
+import util.Configuration;
+import util.Logging;
 import util.LongInteger;
 
 public class PresenceManager {
-    private Map<LongInteger, Set<LongInteger>> presences;
+    private Map<LongInteger, Room> presences;
 
     public PresenceManager() {
-        presences = new HashMap<LongInteger, Set<LongInteger>>();
+        presences = Collections.synchronizedMap(new HashMap<LongInteger, Room>());
     }
 
-    public void setPresence(LongInteger room, LongInteger user, boolean present) {
+    public synchronized void setPresence(LongInteger room, LongInteger user, boolean present) {
         if (!presences.containsKey(room)) {
-            presences.put(room, new HashSet<LongInteger>());
+            presences.put(room, new Room(room));
+            notifyAll();
         }
+
         if (present) {
-            presences.get(room).add(user);
+            presences.get(room).members.add(user);
         } else {
-            presences.get(room).remove(user);
-            if (presences.get(room).size() == 0) {
+            presences.get(room).members.remove(user);
+            if (presences.get(room).members.size() == 0) {
                 presences.remove(room);
             }
         }
     }
 
-    public LongInteger[] membersOf(LongInteger room) {
-        if (!presences.containsKey(room) || presences.get(room).size() == 0) {
+    public synchronized LongInteger[] membersOf(LongInteger room) {
+        if (!presences.containsKey(room) || presences.get(room).members.size() == 0) {
             return new LongInteger[0];
         }
 
-        return presences.get(room).toArray(new LongInteger[presences.get(room).size()]);
+        return presences.get(room).members.toArray(new LongInteger[presences.get(room).members.size()]);
     }
 
-    public boolean isPresent(LongInteger room, LongInteger user) {
-        return presences.containsKey(room) && presences.get(room).contains(user);
+    public synchronized boolean isPresent(LongInteger room, LongInteger user) {
+        return presences.containsKey(room) && presences.get(room).members.contains(user);
     }
 
-    public LongInteger hashMembers(LongInteger roomName) {
+    public synchronized LongInteger hashMembers(LongInteger roomName) {
         LongInteger hash = new LongInteger();
         if (!presences.containsKey(roomName)) {
             return hash;
         }
 
-        for (LongInteger m : presences.get(roomName)) {
+        for (LongInteger m : presences.get(roomName).members) {
             hash.xorWith(m);
         }
 
         return hash;
+    }
+
+    public void startQueries(final ChatSocket sock) {
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                while (true) {
+                    Room nextRoom;
+                    while ((nextRoom = nextTimer()) == null) {
+                        try {
+                            wait();
+                        } catch (InterruptedException e) {
+                            Logging.getLogger().warning("wait was interrupted");
+                        }
+                    }
+
+                    try {
+                        sock.sendPacket(sock.wrapPayload(new RoomComparisonMessage(nextRoom.name,
+                                hashMembers(nextRoom.name))));
+                    } catch (IOException e) {
+                        Logging.getLogger().warning("Unable to send room comparison");
+                    }
+                }
+            }
+        });
+
+    }
+
+    private Room nextTimer() {
+        Room min = null;
+        for (LongInteger r : presences.keySet()) {
+            if (presences.get(r).timerRemaining < min.timerRemaining) {
+                min = presences.get(r);
+            }
+        }
+        return min;
     }
 
     @Override
@@ -59,12 +105,30 @@ public class PresenceManager {
         for (LongInteger r : presences.keySet()) {
             sb.append(r);
             sb.append(" members: \n");
-            for (LongInteger m : presences.get(r)) {
+            for (LongInteger m : presences.get(r).members) {
                 sb.append("    ");
                 sb.append(m);
                 sb.append("\n");
             }
         }
         return sb.toString();
+    }
+
+    private class Room {
+        public LongInteger name;
+        public Set<LongInteger> members;
+        public long timerRemaining;
+        private Random rand;
+
+        public Room(LongInteger name) {
+            this.name = name;
+            this.members = Collections.synchronizedSet(new HashSet<LongInteger>());
+            this.rand = new Random();
+            this.generateTimer();
+        }
+
+        public void generateTimer() {
+            timerRemaining = rand.nextInt(1000 * Configuration.getInstance().getValueAsInt("timer.rmqi"));
+        }
     }
 }

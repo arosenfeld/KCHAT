@@ -16,6 +16,7 @@ import java.util.UUID;
 
 import packets.ChatPacket;
 import packets.ChatPayload;
+import security.security;
 import transport.PacketCallback;
 import transport.TransportProtocol;
 import util.Logging;
@@ -25,6 +26,7 @@ public class ChatSocket implements PacketCallback {
     private TransportProtocol protocol;
     private MessageStore messageStore;
     private PresenceManager presenceManager;
+    private security securityManager;
 
     private ChatPacketCallback clientCallback;
     private List<Handler> handlers;
@@ -46,6 +48,7 @@ public class ChatSocket implements PacketCallback {
         this.nextPersistId = 0;
 
         this.presenceManager = new PresenceManager();
+        this.securityManager = new security();
 
         this.protocol = protocol;
         this.protocol.setCallback(this);
@@ -70,6 +73,8 @@ public class ChatSocket implements PacketCallback {
     public void start() {
         this.handlers.add(new ChatMessageHandler());
         this.handlers.add(new PresenceHandler());
+        
+        this.presenceManager.startQueries(this);
 
         this.protocol.start();
     }
@@ -80,6 +85,10 @@ public class ChatSocket implements PacketCallback {
 
     public PresenceManager getPresenceManager() {
         return presenceManager;
+    }
+    
+    public security getSecurityManager() {
+        return securityManager;
     }
 
     public TransportProtocol getTransport() {
