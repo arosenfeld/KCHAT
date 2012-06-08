@@ -32,9 +32,6 @@ public class Main {
         cmdLine = new BufferedReader(new InputStreamReader(System.in));
         init();
 
-        // load security
-        security sec = new security();
-
         String cmd = "";
         System.out.println("Type 'help' for information or 'exit' to exit.");
         while (!cmd.equals("exit")) {
