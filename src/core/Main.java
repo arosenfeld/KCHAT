@@ -3,20 +3,14 @@ package core;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 
 import operations.commands.InvalidCommandException;
 import operations.commands.PresenceCommand;
 import operations.commands.UserMessageCommand;
 import packets.ChatPacket;
-import packets.messages.PurgeMessage;
-import packets.messages.UserPresenceMessage;
-import packets.messages.UserPresenceMessage.PresenceStatus;
 import transport.UdpMulticast;
 import util.Configuration;
-import util.Logging;
 import util.LongInteger;
-import security.security;
 
 public class Main {
     private static ChatSocket sock;

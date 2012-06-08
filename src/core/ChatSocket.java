@@ -16,7 +16,7 @@ import java.util.UUID;
 
 import packets.ChatPacket;
 import packets.ChatPayload;
-import security.security;
+import security.Security;
 import transport.PacketCallback;
 import transport.TransportProtocol;
 import util.Logging;
@@ -26,7 +26,7 @@ public class ChatSocket implements PacketCallback {
     private TransportProtocol protocol;
     private MessageStore messageStore;
     private PresenceManager presenceManager;
-    private security securityManager;
+    private Security securityManager;
 
     private ChatPacketCallback clientCallback;
     private List<Handler> handlers;
@@ -49,9 +49,9 @@ public class ChatSocket implements PacketCallback {
 
         this.presenceManager = new PresenceManager();
         try {
-            this.securityManager = new security();
+            this.securityManager = new Security();
         } catch (Exception e) {
-            Logging.getLogger().warning("Unable to build security object");
+            Logging.getLogger().warning("Unable to build Security object");
         }
 
         this.protocol = protocol;
@@ -91,7 +91,7 @@ public class ChatSocket implements PacketCallback {
         return presenceManager;
     }
     
-    public security getSecurityManager() {
+    public Security getSecurityManager() {
         return securityManager;
     }
 
