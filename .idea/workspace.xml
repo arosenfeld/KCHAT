@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="72e09cae-edb7-4d34-adf7-782f5ca869c8" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/core/ChatSocket.java" afterPath="$PROJECT_DIR$/src/core/ChatSocket.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/core/Main.java" afterPath="$PROJECT_DIR$/src/core/Main.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/operations/commands/UserMessageCommand.java" afterPath="$PROJECT_DIR$/src/operations/commands/UserMessageCommand.java" />
-    </list>
+    <list default="true" id="72e09cae-edb7-4d34-adf7-782f5ca869c8" name="Default" comment="" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -417,7 +412,11 @@
       <created>1339174955176</created>
       <updated>1339174955176</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Git is making me commit these...I dont think this will hurt so I am committing...">
+      <created>1339175538953</created>
+      <updated>1339175538953</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TodoView" selected-index="0">
