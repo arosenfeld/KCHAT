@@ -48,7 +48,11 @@ public class ChatSocket implements PacketCallback {
         this.nextPersistId = 0;
 
         this.presenceManager = new PresenceManager();
-        this.securityManager = new security();
+        try {
+            this.securityManager = new security();
+        } catch (Exception e) {
+            Logging.getLogger().warning("Unable to build security object");
+        }
 
         this.protocol = protocol;
         this.protocol.setCallback(this);

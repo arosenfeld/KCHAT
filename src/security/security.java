@@ -1,7 +1,6 @@
 package security;
 
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
+import java.security.spec.*;
 import java.util.*;
 import java.security.*;
 import javax.crypto.*;
@@ -13,15 +12,12 @@ public class security {
     private static PublicKey myPubKey;
     private static Hashtable pubKeys;
 
-    public security() throws Exception
-    {
+    public security() throws Exception {
         buildKeys();
         pubKeys = new Hashtable();
     }
 
-    private static void buildKeys()
-            throws Exception
-    {
+    private static void buildKeys() throws Exception {
         KeyPairGenerator kg = KeyPairGenerator.getInstance("RSA");
         kg.initialize(2048);
 
@@ -30,39 +26,33 @@ public class security {
         myPubKey = pair.getPublic();
     }
 
-    public byte[] encrypt(LongInteger userId, byte[] msg) throws Exception
-    {
+    public byte[] encrypt(LongInteger userId, byte[] msg) throws Exception {
         Cipher cipher = Cipher.getInstance("RSA");
         cipher.init(Cipher.ENCRYPT_MODE, (PublicKey) pubKeys.get(userId));
         return cipher.doFinal(msg);
     }
 
-    public byte[] decrypt(byte[] msg) throws Exception
-    {
+    public byte[] decrypt(byte[] msg) throws Exception {
         Cipher cipher = Cipher.getInstance("RSA");
         cipher.init(Cipher.DECRYPT_MODE, myPrivKey);
         return cipher.doFinal(msg);
     }
 
-    public void RemovePublicKey(LongInteger userId)
-    {
+    public void RemovePublicKey(LongInteger userId) {
         if(pubKeys.containsKey(userId)) { pubKeys.remove(userId); }
     }
 
-    public byte[] SendMyPublicKey()
-    {
+    public byte[] SendMyPublicKey() {
         return myPubKey.getEncoded();
     }
 
     public void SaveUserPublicKey(LongInteger userId, byte[] bytes)
-            throws NoSuchAlgorithmException, InvalidKeySpecException
-    {
+            throws NoSuchAlgorithmException, InvalidKeySpecException {
         PublicKey pubKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(bytes));
         pubKeys.put(userId, pubKey);
     }
 
-    public boolean UserHasPublicKey(LongInteger userId)
-    {
+    public boolean UserHasPublicKey(LongInteger userId) {
         return pubKeys.containsKey(userId);
     }
 }
