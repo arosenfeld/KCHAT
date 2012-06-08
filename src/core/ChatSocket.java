@@ -51,7 +51,7 @@ public class ChatSocket implements PacketCallback {
         try {
             this.securityManager = new Security();
         } catch (Exception e) {
-            Logging.getLogger().warning("Unable to build Security object");
+            Logging.getLogger().warning("Unable to build security object");
         }
 
         this.protocol = protocol;
@@ -77,7 +77,7 @@ public class ChatSocket implements PacketCallback {
     public void start() {
         this.handlers.add(new ChatMessageHandler());
         this.handlers.add(new PresenceHandler());
-        
+
         this.presenceManager.startQueries(this);
 
         this.protocol.start();
@@ -90,7 +90,7 @@ public class ChatSocket implements PacketCallback {
     public PresenceManager getPresenceManager() {
         return presenceManager;
     }
-    
+
     public Security getSecurityManager() {
         return securityManager;
     }

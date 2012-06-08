@@ -75,7 +75,7 @@ public class Main {
                 sock.executeCommand(new UserMessageCommand(new LongInteger(split[1]), input.substring(msgOffset)
                         .getBytes(), persist));
             }
-        } else if(input.equals("exit")) {
+        } else if (input.equals("exit")) {
         } else {
             System.out.println("Commands:");
             System.out.println("\tstatus <room> <join|leave>      : Joins/leaves <room>");

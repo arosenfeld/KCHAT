@@ -2,6 +2,7 @@ package operations.handlers;
 
 import java.io.IOException;
 import java.util.Random;
+import java.util.Set;
 
 import operations.PacketMatcher;
 import operations.PacketMatcher.TypeMatcher;
@@ -11,6 +12,8 @@ import packets.messages.RoomComparisonMessage;
 import packets.messages.RoomStatusMessage;
 import packets.messages.UserPresenceMessage;
 import packets.messages.UserPresenceMessage.PresenceStatus;
+import packets.messages.UserStatusMessage.StatusType;
+import packets.messages.UserStatusMessage;
 import util.Configuration;
 import util.Logging;
 import util.LongInteger;
@@ -43,6 +46,9 @@ public class PresenceHandler extends Handler {
         case ROOM_STATUS:
             handleRoomStatus(sock, packet);
             break;
+        case USER_STATUS:
+            handleUserStatus(sock, packet);
+            break;
         }
     }
 
@@ -57,13 +63,12 @@ public class PresenceHandler extends Handler {
 
         // Check if the hash in the message is equal to the local version
         if (!sock.getPresenceManager().hashMembers(rcm.getRoomName()).equals(rcm.getMembersHash())) {
-
+            Logging.getLogger().info("Hashes different");
             // Randomly pick wait period in [0, RMQI)
             int wait = rand.nextInt(1000 * Configuration.getInstance().getValueAsInt("timer.rmqi"));
             // Wait to see if another instance broadcasts a ROOM_STATUS
             // indicating a discrepancy
             ChatPacket recv = sock.waitFor(wait, new PacketMatcher() {
-
                 @Override
                 public boolean matches(ChatPacket packet) {
                     if (packet.getType() == PacketType.ROOM_STATUS) {
@@ -76,7 +81,7 @@ public class PresenceHandler extends Handler {
 
             if (recv == null) {
                 // No other broadcast heard, send our own ROOM_STATUS message
-                LongInteger[] members = sock.getPresenceManager().membersOf(rcm.getRoomName());
+                Set<LongInteger> members = sock.getPresenceManager().membersOf(rcm.getRoomName());
                 try {
                     sock.sendPacket(sock.wrapPayload(new RoomStatusMessage(rcm.getRoomName(), members)));
                 } catch (IOException e) {
@@ -88,8 +93,27 @@ public class PresenceHandler extends Handler {
 
     private void handleRoomStatus(ChatSocket sock, ChatPacket packet) {
         RoomStatusMessage rsm = (RoomStatusMessage) packet.getPayload();
-        for(LongInteger m : rsm.getMembers()) {
-            
+        for (LongInteger m : sock.getPresenceManager().membersOf(rsm.getRoomName())) {
+            if (!rsm.getMembers().contains(m)) {
+                try {
+                    sock.sendPacket(sock.wrapPayload(new UserStatusMessage(StatusType.QUERY, rsm.getRoomName(), m)));
+                } catch (IOException e) {
+                    Logging.getLogger().warning("Unable to send UserStatus");
+                }
+            }
+        }
+    }
+
+    private void handleUserStatus(ChatSocket sock, ChatPacket packet) {
+        UserStatusMessage status = (UserStatusMessage) packet.getPayload();
+        if (status.getStatusType() == StatusType.QUERY && status.getUser().equals(sock.getUUID())) {
+            StatusType pres = sock.getPresenceManager().isPresent(status.getRoom(), status.getUser()) ? StatusType.PRESENT
+                    : StatusType.NOT_PRESENT;
+            try {
+                sock.sendPacket(sock.wrapPayload(new UserStatusMessage(pres, status.getRoom(), status.getUser())));
+            } catch (IOException e) {
+                Logging.getLogger().warning("Unable to send UserStatusMessage");
+            }
         }
     }
 }
