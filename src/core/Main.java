@@ -3,20 +3,15 @@ package core;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 
 import operations.commands.InvalidCommandException;
 import operations.commands.PresenceCommand;
 import operations.commands.UserMessageCommand;
 import packets.ChatPacket;
-import packets.messages.PurgeMessage;
-import packets.messages.UserPresenceMessage;
-import packets.messages.UserPresenceMessage.PresenceStatus;
 import transport.UdpMulticast;
 import util.Configuration;
 import util.Logging;
 import util.LongInteger;
-import security.security;
 
 public class Main {
     private static ChatSocket sock;
@@ -31,9 +26,6 @@ public class Main {
 
         cmdLine = new BufferedReader(new InputStreamReader(System.in));
         init();
-
-        // load security
-        security sec = new security();
 
         String cmd = "";
         System.out.println("Type 'help' for information or 'exit' to exit.");
@@ -84,7 +76,7 @@ public class Main {
                 sock.executeCommand(new UserMessageCommand(new LongInteger(split[1]), input.substring(msgOffset)
                         .getBytes(), persist));
             }
-        } else if(input.equals("exit")) {
+        } else if (input.equals("exit")) {
         } else {
             System.out.println("Commands:");
             System.out.println("\tstatus <room> <join|leave>      : Joins/leaves <room>");

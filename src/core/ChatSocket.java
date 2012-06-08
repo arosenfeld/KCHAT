@@ -16,7 +16,7 @@ import java.util.UUID;
 
 import packets.ChatPacket;
 import packets.ChatPayload;
-import security.security;
+import security.Security;
 import transport.PacketCallback;
 import transport.TransportProtocol;
 import util.Logging;
@@ -26,7 +26,7 @@ public class ChatSocket implements PacketCallback {
     private TransportProtocol protocol;
     private MessageStore messageStore;
     private PresenceManager presenceManager;
-    private security securityManager;
+    private Security securityManager;
 
     private ChatPacketCallback clientCallback;
     private List<Handler> handlers;
@@ -48,7 +48,12 @@ public class ChatSocket implements PacketCallback {
         this.nextPersistId = 0;
 
         this.presenceManager = new PresenceManager();
-        this.securityManager = new security();
+
+        try {
+            this.securityManager = new Security();
+        } catch (Exception e) {
+            Logging.getLogger().severe("Unable to create security manager.");
+        }
 
         this.protocol = protocol;
         this.protocol.setCallback(this);
@@ -73,7 +78,7 @@ public class ChatSocket implements PacketCallback {
     public void start() {
         this.handlers.add(new ChatMessageHandler());
         this.handlers.add(new PresenceHandler());
-        
+
         this.presenceManager.startQueries(this);
 
         this.protocol.start();
@@ -86,8 +91,8 @@ public class ChatSocket implements PacketCallback {
     public PresenceManager getPresenceManager() {
         return presenceManager;
     }
-    
-    public security getSecurityManager() {
+
+    public Security getSecurityManager() {
         return securityManager;
     }
 
@@ -139,7 +144,6 @@ public class ChatSocket implements PacketCallback {
                 if ((waitTime = endTime - Calendar.getInstance().getTimeInMillis()) <= 0) {
                     return null;
                 }
-                Logging.getLogger().info("waiting " + waitTime);
                 wait(waitTime);
             } while (last == null || matcher.matches(last));
             return last;

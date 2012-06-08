@@ -33,6 +33,7 @@ public class PresenceHandler extends Handler {
 
     @Override
     public void process(ChatSocket sock, ChatPacket packet) {
+        //Logging.getLogger().info("PH got " + packet.getType());
         switch (packet.getType()) {
         case USER_PRESENCE:
             handleUserPresence(sock, packet);
@@ -57,7 +58,7 @@ public class PresenceHandler extends Handler {
 
         // Check if the hash in the message is equal to the local version
         if (!sock.getPresenceManager().hashMembers(rcm.getRoomName()).equals(rcm.getMembersHash())) {
-
+            Logging.getLogger().info("Hashes different");
             // Randomly pick wait period in [0, RMQI)
             int wait = rand.nextInt(1000 * Configuration.getInstance().getValueAsInt("timer.rmqi"));
             // Wait to see if another instance broadcasts a ROOM_STATUS
@@ -89,7 +90,6 @@ public class PresenceHandler extends Handler {
     private void handleRoomStatus(ChatSocket sock, ChatPacket packet) {
         RoomStatusMessage rsm = (RoomStatusMessage) packet.getPayload();
         for(LongInteger m : rsm.getMembers()) {
-            
         }
     }
 }

@@ -1,6 +1,7 @@
 package core;
 
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -63,6 +64,7 @@ public class PresenceManager {
     }
 
     public void startQueries(final ChatSocket sock) {
+        final PresenceManager lcl = this;
         new Thread(new Runnable() {
 
             @Override
@@ -70,29 +72,41 @@ public class PresenceManager {
                 while (true) {
                     Room nextRoom;
                     while ((nextRoom = nextTimer()) == null) {
+                        Logging.getLogger().info("Waiting...");
                         try {
-                            wait();
+                            synchronized (lcl) {
+                                lcl.wait();
+                            }
                         } catch (InterruptedException e) {
                             Logging.getLogger().warning("wait was interrupted");
                         }
                     }
 
+                    if (nextRoom.timerEndTime - Calendar.getInstance().getTimeInMillis() > 0) {
+                        try {
+                            Thread.sleep(nextRoom.timerEndTime - Calendar.getInstance().getTimeInMillis());
+                        } catch (InterruptedException e1) {
+                            Logging.getLogger().warning("Thread sleep interrupted.");
+                        }
+                    }
+
+                    Logging.getLogger().info("Sending room comparison.");
                     try {
                         sock.sendPacket(sock.wrapPayload(new RoomComparisonMessage(nextRoom.name,
                                 hashMembers(nextRoom.name))));
+                        nextRoom.generateTimer();
                     } catch (IOException e) {
                         Logging.getLogger().warning("Unable to send room comparison");
                     }
                 }
             }
-        });
-
+        }).start();
     }
 
     private Room nextTimer() {
         Room min = null;
         for (LongInteger r : presences.keySet()) {
-            if (presences.get(r).timerRemaining < min.timerRemaining) {
+            if (min == null || presences.get(r).timerEndTime < min.timerEndTime) {
                 min = presences.get(r);
             }
         }
@@ -117,7 +131,7 @@ public class PresenceManager {
     private class Room {
         public LongInteger name;
         public Set<LongInteger> members;
-        public long timerRemaining;
+        public long timerEndTime;
         private Random rand;
 
         public Room(LongInteger name) {
@@ -128,7 +142,8 @@ public class PresenceManager {
         }
 
         public void generateTimer() {
-            timerRemaining = rand.nextInt(1000 * Configuration.getInstance().getValueAsInt("timer.rmqi"));
+            timerEndTime = Calendar.getInstance().getTimeInMillis()
+                    + rand.nextInt(1000 * Configuration.getInstance().getValueAsInt("timer.rmqi"));
         }
     }
 }
