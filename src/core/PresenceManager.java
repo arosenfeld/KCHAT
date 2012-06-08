@@ -38,12 +38,12 @@ public class PresenceManager {
         }
     }
 
-    public synchronized LongInteger[] membersOf(LongInteger room) {
+    public synchronized Set<LongInteger> membersOf(LongInteger room) {
         if (!presences.containsKey(room) || presences.get(room).members.size() == 0) {
-            return new LongInteger[0];
+            return new HashSet<LongInteger>();
         }
 
-        return presences.get(room).members.toArray(new LongInteger[presences.get(room).members.size()]);
+        return presences.get(room).members;
     }
 
     public synchronized boolean isPresent(LongInteger room, LongInteger user) {
