@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import java.security.*;
 import java.security.spec.*;
 import javax.crypto.*;
+import util.LongInteger;
 
 public class security {
 
@@ -81,18 +82,41 @@ public class security {
         }
     }
 
-    private static byte[] encrypt(byte[] inpBytes, PublicKey key)
+    public byte[] encrypt(LongInteger userId, byte[] msg)
+    {
+        // get public key...
+        PublicKey pubKey;
+        return doEncrypt(msg, pubKey);
+    }
+
+    private static byte[] doEncrypt(byte[] inpBytes, PublicKey key)
             throws Exception {
         Cipher cipher = Cipher.getInstance("RSA");
         cipher.init(Cipher.ENCRYPT_MODE, key);
         return cipher.doFinal(inpBytes);
     }
 
-    private static byte[] decrypt(byte[] inpBytes, PrivateKey key)
+    public byte[] decrypt(byte[] msg)
+    {
+        //get private key...
+        PrivateKey privKey;
+        return doDecrypt(msg, privKey);
+    }
+
+    private static byte[] doDecrypt(byte[] inpBytes, PrivateKey key)
             throws Exception {
         Cipher cipher = Cipher.getInstance("RSA");
         cipher.init(Cipher.DECRYPT_MODE, key);
         return cipher.doFinal(inpBytes);
     }
 
+    public void SaveUserPublicKey(LongInteger userId, byte[] pubKey)
+    {
+
+    }
+
+    public boolean UserHasPublicKey(LongInteger userId)
+    {
+        return true;
+    }
 }
