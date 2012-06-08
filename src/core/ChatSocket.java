@@ -13,18 +13,20 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import packets.ChatPacket;
 import packets.ChatPayload;
 import security.Security;
 import transport.PacketCallback;
 import transport.TransportProtocol;
+import util.Configuration;
 import util.Logging;
 import util.LongInteger;
 
 public class ChatSocket implements PacketCallback {
     private TransportProtocol protocol;
-    private MessageStore messageStore;
+    private PersistenceManager persistenceManager;
     private PresenceManager presenceManager;
     private Security securityManager;
 
@@ -37,6 +39,7 @@ public class ChatSocket implements PacketCallback {
     private volatile int nextSeqId;
     private volatile int nextMessageId;
     private volatile int nextPersistId;
+    private volatile int grtt;
 
     private ChatPacket last;
     private DuplicateFilter duplicates;
@@ -46,23 +49,20 @@ public class ChatSocket implements PacketCallback {
         this.version = version;
         this.nextSeqId = 0;
         this.nextPersistId = 0;
+        this.grtt = 1000 * Configuration.getInstance().getValueAsInt("timer.grtt_init");
 
-        this.presenceManager = new PresenceManager();
-        try {
-            this.securityManager = new Security();
-        } catch (Exception e) {
-            Logging.getLogger().warning("Unable to build security object");
-        }
+        this.presenceManager = new PresenceManager(this);
+        this.persistenceManager = new PersistenceManager(this);
+        /*
+         * try { this.securityManager = new Security(); } catch (Exception e) {
+         * Logging.getLogger().warning("Unable to build security object"); }
+         */
 
         this.protocol = protocol;
         this.protocol.setCallback(this);
 
-        this.messageStore = new MessageStore();
-
         this.clientCallback = callback;
-
         this.duplicates = new DuplicateFilter(500);
-
         this.handlers = new LinkedList<Handler>();
     }
 
@@ -78,7 +78,8 @@ public class ChatSocket implements PacketCallback {
         this.handlers.add(new ChatMessageHandler());
         this.handlers.add(new PresenceHandler());
 
-        this.presenceManager.startQueries(this);
+        this.presenceManager.start();
+        this.persistenceManager.start();
 
         this.protocol.start();
     }
@@ -119,6 +120,18 @@ public class ChatSocket implements PacketCallback {
         return ++nextPersistId;
     }
 
+    public int getGRTT() {
+        return grtt;
+    }
+
+    public void addSampledGRTT(int time) {
+        grtt = Math.min((int) (.8 * grtt + .2 * time), Configuration.getInstance().getValueAsInt("timer.grtt_max"));
+    }
+
+    public void doubleGRTT() {
+        grtt *= 2;
+    }
+
     public ChatPacketCallback getClientCallback() {
         return clientCallback;
     }
@@ -127,7 +140,7 @@ public class ChatSocket implements PacketCallback {
         return new ChatPacket(version, getNextSeq(), uuid, pld);
     }
 
-    public void executeCommand(Command cmd) throws InvalidCommandException {
+    public void executeCommand(final Command cmd) throws InvalidCommandException {
         cmd.invoke(this);
     }
 
@@ -143,9 +156,8 @@ public class ChatSocket implements PacketCallback {
                 if ((waitTime = endTime - Calendar.getInstance().getTimeInMillis()) <= 0) {
                     return null;
                 }
-                Logging.getLogger().info("waiting " + waitTime);
                 wait(waitTime);
-            } while (last == null || matcher.matches(last));
+            } while (last == null || !matcher.matches(last));
             return last;
         } catch (InterruptedException e) {
             Logging.getLogger().warning("Wait was interrupted.");
@@ -157,6 +169,7 @@ public class ChatSocket implements PacketCallback {
     public synchronized void processPacket(byte[] data) {
         ChatPacket packet = new ChatPacket(data);
         if (!duplicates.heard(packet) && !packet.getSrc().equals(uuid)) {
+
             if (packet.getPayload() != null && packet.getPayload().getType() == packet.getType()) {
                 duplicates.add(packet);
                 last = packet;

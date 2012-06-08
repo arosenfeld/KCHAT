@@ -39,7 +39,12 @@ public class ChatMessageHandler extends Handler {
                 } catch (InvalidCommandException e) {
                     Logging.getLogger().warning("Unable to execute Purge after receiving message.");
                 }
+            } else {
+                if (!sock.getPresenceManager().isPresent(msg.getDest(), sock.getUUID())) {
+                    return;
+                }
             }
+
             if (!alreadyPassedToClient(packet)) {
                 sock.getClientCallback().receivePacket(packet);
             }

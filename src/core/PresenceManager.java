@@ -15,11 +15,13 @@ import util.Configuration;
 import util.Logging;
 import util.LongInteger;
 
-public class PresenceManager {
+public class PresenceManager extends Thread {
     private Map<LongInteger, Room> presences;
+    private ChatSocket sock;
 
-    public PresenceManager() {
+    public PresenceManager(ChatSocket sock) {
         presences = Collections.synchronizedMap(new HashMap<LongInteger, Room>());
+        this.sock = sock;
     }
 
     public LongInteger[] getRooms() {
@@ -67,44 +69,35 @@ public class PresenceManager {
         return hash;
     }
 
-    public void startQueries(final ChatSocket sock) {
-        final PresenceManager lcl = this;
-        new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                while (true) {
-                    Room nextRoom;
-                    while ((nextRoom = nextTimer()) == null) {
-                        Logging.getLogger().info("Waiting...");
-                        try {
-                            synchronized (lcl) {
-                                lcl.wait();
-                            }
-                        } catch (InterruptedException e) {
-                            Logging.getLogger().warning("wait was interrupted");
-                        }
+    @Override
+    public void run() {
+        while (true) {
+            Room nextRoom;
+            while ((nextRoom = nextTimer()) == null) {
+                try {
+                    synchronized (this) {
+                        this.wait();
                     }
-
-                    if (nextRoom.timerEndTime - Calendar.getInstance().getTimeInMillis() > 0) {
-                        try {
-                            Thread.sleep(nextRoom.timerEndTime - Calendar.getInstance().getTimeInMillis());
-                        } catch (InterruptedException e1) {
-                            Logging.getLogger().warning("Thread sleep interrupted.");
-                        }
-                    }
-
-                    Logging.getLogger().info("Sending room comparison.");
-                    try {
-                        sock.sendPacket(sock.wrapPayload(new RoomComparisonMessage(nextRoom.name,
-                                hashMembers(nextRoom.name))));
-                        nextRoom.generateTimer();
-                    } catch (IOException e) {
-                        Logging.getLogger().warning("Unable to send room comparison");
-                    }
+                } catch (InterruptedException e) {
+                    Logging.getLogger().warning("wait was interrupted");
                 }
             }
-        }).start();
+
+            if (nextRoom.timerEndTime - Calendar.getInstance().getTimeInMillis() > 0) {
+                try {
+                    Thread.sleep(nextRoom.timerEndTime - Calendar.getInstance().getTimeInMillis());
+                } catch (InterruptedException e1) {
+                    Logging.getLogger().warning("Thread sleep interrupted.");
+                }
+            }
+
+            try {
+                sock.sendPacket(sock.wrapPayload(new RoomComparisonMessage(nextRoom.name, hashMembers(nextRoom.name))));
+                nextRoom.generateTimer();
+            } catch (IOException e) {
+                Logging.getLogger().warning("Unable to send room comparison");
+            }
+        }
     }
 
     private Room nextTimer() {

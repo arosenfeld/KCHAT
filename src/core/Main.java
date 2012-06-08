@@ -27,7 +27,7 @@ public class Main {
         init();
 
         String cmd = "";
-        System.out.println("Type 'help' for information or 'exit' to exit.");
+        System.out.println("Type 'help' for information or Ctrl-C to exit.");
         while (!cmd.equals("exit")) {
             System.out.print("> ");
             cmd = cmdLine.readLine();
@@ -75,7 +75,6 @@ public class Main {
                 sock.executeCommand(new UserMessageCommand(new LongInteger(split[1]), input.substring(msgOffset)
                         .getBytes(), persist));
             }
-        } else if (input.equals("exit")) {
         } else {
             System.out.println("Commands:");
             System.out.println("\tstatus <room> <join|leave>      : Joins/leaves <room>");
@@ -83,7 +82,6 @@ public class Main {
                     .println("\tmsg-user <user> <persist> <msg> : Sends <user> the message <msg>.  If [persist] equals 'Y', it will be sent persistently");
             System.out.println("\trooms                           : Lists rooms and members");
             System.out.println("\thelp                            : Prints this help message");
-            System.out.println("\texit                            : Closes the socket and exits the driver");
         }
     }
 }

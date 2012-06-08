@@ -151,6 +151,14 @@ public class ChatPacket implements Packable {
     }
 
     @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 71 * hash + (this.src != null ? this.src.hashCode() : 0);
+        hash = 71 * hash + this.sequence;
+        return hash;
+    }
+
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("\nVersion: " + version + "\n");

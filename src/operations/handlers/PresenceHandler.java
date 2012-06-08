@@ -24,8 +24,8 @@ public class PresenceHandler extends Handler {
     private Random rand;
 
     public PresenceHandler() {
-        // TODO: Other presence packets
-        this.pm = new TypeMatcher(PacketType.USER_PRESENCE, PacketType.ROOM_COMPARISON);
+        this.pm = new TypeMatcher(PacketType.USER_PRESENCE, PacketType.ROOM_COMPARISON, PacketType.ROOM_STATUS,
+                PacketType.USER_STATUS);
         this.rand = new Random();
     }
 
@@ -63,7 +63,6 @@ public class PresenceHandler extends Handler {
 
         // Check if the hash in the message is equal to the local version
         if (!sock.getPresenceManager().hashMembers(rcm.getRoomName()).equals(rcm.getMembersHash())) {
-            Logging.getLogger().info("Hashes different");
             // Randomly pick wait period in [0, RMQI)
             int wait = rand.nextInt(1000 * Configuration.getInstance().getValueAsInt("timer.rmqi"));
             // Wait to see if another instance broadcasts a ROOM_STATUS
@@ -96,7 +95,15 @@ public class PresenceHandler extends Handler {
         for (LongInteger m : sock.getPresenceManager().membersOf(rsm.getRoomName())) {
             if (!rsm.getMembers().contains(m)) {
                 try {
-                    sock.sendPacket(sock.wrapPayload(new UserStatusMessage(StatusType.QUERY, rsm.getRoomName(), m)));
+                    if (m.equals(sock.getUUID())) {
+                        StatusType pres = sock.getPresenceManager().isPresent(rsm.getRoomName(), m) ? StatusType.PRESENT
+                                : StatusType.NOT_PRESENT;
+                        sock.sendPacket(sock.wrapPayload(new UserStatusMessage(pres, rsm.getRoomName(), m)));
+                    } else {
+                        sock
+                                .sendPacket(sock.wrapPayload(new UserStatusMessage(StatusType.QUERY, rsm.getRoomName(),
+                                        m)));
+                    }
                 } catch (IOException e) {
                     Logging.getLogger().warning("Unable to send UserStatus");
                 }
@@ -114,6 +121,10 @@ public class PresenceHandler extends Handler {
             } catch (IOException e) {
                 Logging.getLogger().warning("Unable to send UserStatusMessage");
             }
+        } else if (status.getStatusType() == StatusType.PRESENT) {
+            sock.getPresenceManager().setPresence(status.getRoom(), status.getUser(), true);
+        } else if (status.getStatusType() == StatusType.NOT_PRESENT) {
+            sock.getPresenceManager().setPresence(status.getRoom(), status.getUser(), false);
         }
     }
 }
