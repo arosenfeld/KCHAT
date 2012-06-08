@@ -6,15 +6,15 @@ import java.security.*;
 import javax.crypto.*;
 import util.LongInteger;
 
-public class security {
+public class Security {
 
     private static PrivateKey myPrivKey;
     private static PublicKey myPubKey;
-    private static Hashtable pubKeys;
+    private static Hashtable<LongInteger, PublicKey> pubKeys;
 
-    public security() throws Exception {
+    public Security() throws Exception {
         buildKeys();
-        pubKeys = new Hashtable();
+        pubKeys = new Hashtable<LongInteger, PublicKey>();
     }
 
     private static void buildKeys() throws Exception {
@@ -28,7 +28,7 @@ public class security {
 
     public byte[] encrypt(LongInteger userId, byte[] msg) throws Exception {
         Cipher cipher = Cipher.getInstance("RSA");
-        cipher.init(Cipher.ENCRYPT_MODE, (PublicKey) pubKeys.get(userId));
+        cipher.init(Cipher.ENCRYPT_MODE, pubKeys.get(userId));
         return cipher.doFinal(msg);
     }
 
@@ -39,15 +39,17 @@ public class security {
     }
 
     public void RemovePublicKey(LongInteger userId) {
-        if(pubKeys.containsKey(userId)) { pubKeys.remove(userId); }
+        if (pubKeys.containsKey(userId)) {
+            pubKeys.remove(userId);
+        }
     }
 
     public byte[] SendMyPublicKey() {
         return myPubKey.getEncoded();
     }
 
-    public void SaveUserPublicKey(LongInteger userId, byte[] bytes)
-            throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public void SaveUserPublicKey(LongInteger userId, byte[] bytes) throws NoSuchAlgorithmException,
+            InvalidKeySpecException {
         PublicKey pubKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(bytes));
         pubKeys.put(userId, pubKey);
     }
