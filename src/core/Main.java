@@ -16,6 +16,7 @@ import transport.UdpMulticast;
 import util.Configuration;
 import util.Logging;
 import util.LongInteger;
+import security.security;
 
 public class Main {
     private static ChatSocket sock;
@@ -30,6 +31,9 @@ public class Main {
 
         cmdLine = new BufferedReader(new InputStreamReader(System.in));
         init();
+
+        // load security
+        security sec = new security();
 
         String cmd = "";
         System.out.println("Type 'help' for information or 'exit' to exit.");
