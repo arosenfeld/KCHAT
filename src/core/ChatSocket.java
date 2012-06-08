@@ -70,6 +70,8 @@ public class ChatSocket implements PacketCallback {
     public void start() {
         this.handlers.add(new ChatMessageHandler());
         this.handlers.add(new PresenceHandler());
+        
+        this.presenceManager.startQueries(this);
 
         this.protocol.start();
     }
