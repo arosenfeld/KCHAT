@@ -1,5 +1,7 @@
 package security;
 
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
 import java.security.*;
 import javax.crypto.*;
@@ -10,10 +12,6 @@ public class security {
     private static PrivateKey myPrivKey;
     private static PublicKey myPubKey;
     private static Hashtable pubKeys;
-
-    public static void main(String[] blah) throws Exception {
-        buildKeys();
-    }
 
     public security() throws Exception
     {
@@ -35,7 +33,7 @@ public class security {
     public byte[] encrypt(LongInteger userId, byte[] msg) throws Exception
     {
         Cipher cipher = Cipher.getInstance("RSA");
-        cipher.init(Cipher.ENCRYPT_MODE, myPubKey);
+        cipher.init(Cipher.ENCRYPT_MODE, (PublicKey) pubKeys.get(userId));
         return cipher.doFinal(msg);
     }
 
@@ -46,8 +44,20 @@ public class security {
         return cipher.doFinal(msg);
     }
 
-    public void SaveUserPublicKey(LongInteger userId, byte[] pubKey)
+    public void RemovePublicKey(LongInteger userId)
     {
+        if(pubKeys.containsKey(userId)) { pubKeys.remove(userId); }
+    }
+
+    public byte[] SendMyPublicKey()
+    {
+        return myPubKey.getEncoded();
+    }
+
+    public void SaveUserPublicKey(LongInteger userId, byte[] bytes)
+            throws NoSuchAlgorithmException, InvalidKeySpecException
+    {
+        PublicKey pubKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(bytes));
         pubKeys.put(userId, pubKey);
     }
 
