@@ -9,6 +9,7 @@ import packets.ChatPacket.PacketType;
 import packets.messages.ChatMessage;
 import packets.messages.PurgeMessage;
 import packets.messages.ChatMessage.MessageField;
+import security.security;
 import util.Logging;
 import util.LongInteger;
 import core.ChatSocket;
@@ -29,6 +30,17 @@ public class UserMessageCommand extends Command {
     public void invoke(ChatSocket socket) throws InvalidCommandException {
         sentMessageId = socket.getNextSeq();
         ChatPacket received;
+
+//        if (socket.getSecurityManager().UserHasPublicKey(dest)) {
+//            try {
+//                message = socket.getSecurityManager().encrypt(dest, message);
+//            } catch (Exception e1) {
+//                throw new InvalidCommandException("Unable to encrypt message.");
+//            }
+//        } else {
+//            throw new InvalidCommandException("Unable to send to " + dest + ".  No know public key.");
+//        }
+        
         synchronized (socket) {
             try {
                 ChatMessage msg = new ChatMessage(socket.getNextMessageId(), dest, message);
