@@ -47,6 +47,14 @@ public class ChatMessageHandler extends Handler {
         socket.getPersistenceManager().persistPacket(packet);
         
         if (shouldPass(socket, original)) {
+            if(!original.getParam(MessageField.TO_ROOM)) {
+                try {
+                    original.setMessage(socket.getSecurityManager().decrypt(original.getMessage()));
+                } catch (Exception e1) {
+                    Logging.getLogger().warning("Unable to decrypt message");
+                    return;
+                }
+            }
             socket.pushToClient(pushed.getPacket());
         }
     }

@@ -54,7 +54,7 @@ public class ChatMessage implements ChatPayload {
     public ChatMessage(int messageId, LongInteger dest, byte[] message) {
         this(messageId, 0, dest, message);
     }
-    
+
     public int getMessageId() {
         return messageId;
     }
@@ -73,6 +73,10 @@ public class ChatMessage implements ChatPayload {
 
     public byte[] getMessage() {
         return message;
+    }
+
+    public void setMessage(byte[] message) {
+        this.message = message;
     }
 
     public boolean getParam(MessageField field) {
