@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.UUID;
 import packets.ChatPacket;
 import packets.ChatPayload;
+import packets.ChatPacket.PacketType;
 import packets.messages.ChatMessage;
 import security.Security;
 import transport.PacketCallback;
@@ -161,9 +162,13 @@ public class ChatSocket implements PacketCallback {
             passedToClient.put(packet.getSrc(), new HashSet<Integer>());
         }
 
-        int msgId = ((ChatMessage) packet.getPayload()).getMessageId();
-        if (!passedToClient.get(packet.getSrc()).contains(msgId) || forcePush) {
-            passedToClient.get(packet.getSrc()).add(msgId);
+        if (packet.getType() == PacketType.CHAT_MESSAGE) {
+            int msgId = ((ChatMessage) packet.getPayload()).getMessageId();
+            if (!passedToClient.get(packet.getSrc()).contains(msgId) || forcePush) {
+                passedToClient.get(packet.getSrc()).add(msgId);
+                clientCallback.receivePacket(packet);
+            }
+        } else if (packet.getType() == PacketType.USER_PRESENCE) {
             clientCallback.receivePacket(packet);
         }
     }

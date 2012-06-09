@@ -29,6 +29,9 @@ import operations.commands.PresenceCommand;
 import operations.commands.RoomMessageCommand;
 import operations.commands.UserMessageCommand;
 import packets.ChatPacket;
+import packets.ChatPacket.PacketType;
+import packets.messages.ChatMessage;
+import packets.messages.UserPresenceMessage;
 import transport.UdpMulticast;
 import util.Configuration;
 import util.LongInteger;
@@ -36,7 +39,7 @@ import core.ChatPacketCallback;
 import core.ChatSocket;
 
 //the public class for the chat gi
-public class ChatGUI extends JFrame {
+public class ChatGUI extends JFrame implements ChatPacketCallback {
 
     private static final long serialVersionUID = -8020776555862630725L;
     // private data types used by the gui
@@ -195,14 +198,7 @@ public class ChatGUI extends JFrame {
             Configuration.getInstance().setFile(propertiesPath);
             sock = new ChatSocket(new UdpMulticast(Configuration.getInstance().getValueAsString("udp.iface"),
                     Configuration.getInstance().getValueAsString("udp.host"), Configuration.getInstance()
-                            .getValueAsInt("udp.port")), new ChatPacketCallback() {
-
-                @Override
-                public void receivePacket(ChatPacket message) {
-                    System.out.println("! Received Packet " + message);
-                    System.out.println("----------------------------");
-                }
-            });
+                            .getValueAsInt("udp.port")), this);
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null, "Cannot Open Socket", "alert", JOptionPane.ERROR_MESSAGE);
             // Exit the application if socket is not established
@@ -434,4 +430,14 @@ public class ChatGUI extends JFrame {
         contentPane.add(tabbedPane, BorderLayout.CENTER);
     }
 
+    @Override
+    public void receivePacket(ChatPacket packet) {
+        if(packet.getType() == PacketType.CHAT_MESSAGE) {
+            ChatMessage message = (ChatMessage) packet.getPayload();
+            // Got a message
+        } else if(packet.getType() == PacketType.USER_PRESENCE) {
+            UserPresenceMessage pres = (UserPresenceMessage) packet.getPayload();
+            // Someone joined or left a room
+        }
+    }
 }

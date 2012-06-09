@@ -56,6 +56,7 @@ public class PresenceHandler extends Handler {
         UserPresenceMessage up = (UserPresenceMessage) packet.getPayload();
         sock.getPresenceManager().setPresence(up.getRoomName(), packet.getSrc(),
                 up.getPresenceStatus() == PresenceStatus.JOIN);
+        sock.pushToClient(packet);
     }
 
     private void handleRoomComparison(ChatSocket sock, ChatPacket packet) {
