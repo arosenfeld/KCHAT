@@ -27,7 +27,7 @@ public class UserStatusMessage implements ChatPayload {
         this.room = room;
         this.user = user;
     }
-    
+
     public StatusType getStatusType() {
         return type;
     }

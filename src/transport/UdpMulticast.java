@@ -78,7 +78,7 @@ public class UdpMulticast extends TransportProtocol {
                 try {
                     socket.receive(p);
                     cb.processPacket(p.getData());
-                } catch(SocketException e) {
+                } catch (SocketException e) {
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();

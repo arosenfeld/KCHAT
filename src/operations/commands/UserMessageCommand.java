@@ -30,15 +30,14 @@ public class UserMessageCommand extends Command {
     public void invoke(final ChatSocket socket) throws InvalidCommandException {
         sentMessageId = socket.getNextSeq();
 
-        /*if (socket.getSecurityManager().UserHasPublicKey(dest)) {
-            try {
-                message = socket.getSecurityManager().encrypt(dest, message);
-            } catch (Exception e1) {
-                throw new InvalidCommandException("Unable to encrypt message.");
-            }
-        } else {
-            throw new InvalidCommandException("Unable to send to " + dest + ".  No know public key.");
-        }*/
+        /*
+         * if (socket.getSecurityManager().UserHasPublicKey(dest)) { try {
+         * message = socket.getSecurityManager().encrypt(dest, message); } catch
+         * (Exception e1) { throw new
+         * InvalidCommandException("Unable to encrypt message."); } } else {
+         * throw new InvalidCommandException("Unable to send to " + dest +
+         * ".  No know public key."); }
+         */
 
         synchronized (socket) {
             try {

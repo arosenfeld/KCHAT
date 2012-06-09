@@ -22,13 +22,13 @@ public class PersistenceHandler extends Handler {
         if (packet.getType() == PacketType.MANIFEST) {
             ManifestMessage mfst = (ManifestMessage) packet.getPayload();
 
-            //Logging.getLogger().info("Checking local...");
+            // Logging.getLogger().info("Checking local...");
             // Push those that are local
             for (int seq : sock.getPersistenceManager().getHeard(mfst.getSrc())) {
-                //Logging.getLogger().info("    Checking " + seq);
+                // Logging.getLogger().info("    Checking " + seq);
                 if (!mfst.getSeqs().contains(seq)) {
                     try {
-                        //Logging.getLogger().info("        Pushing " + seq);
+                        // Logging.getLogger().info("        Pushing " + seq);
                         PushMessage msg = new PushMessage(mfst.getSrc(), sock.getPersistenceManager().getPacket(
                                 mfst.getSrc(), seq));
                         sock.sendPacket(sock.wrapPayload(msg));
@@ -38,13 +38,13 @@ public class PersistenceHandler extends Handler {
                 }
             }
 
-            //Logging.getLogger().info("Checking remote...");
+            // Logging.getLogger().info("Checking remote...");
             // Request those that are remote
             for (int seq : mfst.getSeqs()) {
                 Set<Integer> heard = sock.getPersistenceManager().getHeard(mfst.getSrc());
-                //Logging.getLogger().info("    Checking " + seq);
+                // Logging.getLogger().info("    Checking " + seq);
                 if (!heard.contains(seq)) {
-                    //Logging.getLogger().info("        Request " + seq);
+                    // Logging.getLogger().info("        Request " + seq);
                     try {
                         sock.sendPacket(sock.wrapPayload(new ManifestMessage(mfst.getSrc(), heard)));
                     } catch (IOException e) {
@@ -52,7 +52,7 @@ public class PersistenceHandler extends Handler {
                     }
                 }
             }
-        } else if(packet.getType() == PacketType.PURGE) {
+        } else if (packet.getType() == PacketType.PURGE) {
             // TODO
         }
     }

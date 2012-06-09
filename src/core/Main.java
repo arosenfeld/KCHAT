@@ -9,7 +9,6 @@ import operations.commands.PresenceCommand;
 import operations.commands.RoomMessageCommand;
 import operations.commands.UserMessageCommand;
 import packets.ChatPacket;
-import packets.messages.RoomComparisonMessage;
 import transport.UdpMulticast;
 import util.Configuration;
 import util.LongInteger;
@@ -73,7 +72,8 @@ public class Main {
         } else if (input.startsWith("msg-room")) {
             if (split.length >= 2) {
                 int msgOffset = split[0].length() + split[1].length() + 1;
-                sock.executeCommand(new RoomMessageCommand(new LongInteger(split[1]), input.substring(msgOffset).getBytes()));
+                sock.executeCommand(new RoomMessageCommand(new LongInteger(split[1]), input.substring(msgOffset)
+                        .getBytes()));
             }
         } else if (input.startsWith("msg-user")) {
             if (split.length >= 3) {

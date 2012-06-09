@@ -1,8 +1,5 @@
 package operations.handlers;
 
-import operations.commands.InvalidCommandException;
-import operations.commands.PurgeCommand;
-
 import core.ChatSocket;
 import operations.PacketMatcher.TypeMatcher;
 import packets.ChatPacket;
@@ -10,7 +7,6 @@ import packets.ChatPacket.PacketType;
 import packets.messages.ChatMessage;
 import packets.messages.PushMessage;
 import packets.messages.ChatMessage.MessageField;
-import util.Logging;
 
 public class ChatMessageHandler extends Handler {
 
@@ -45,16 +41,16 @@ public class ChatMessageHandler extends Handler {
         PushMessage pushed = (PushMessage) packet.getPayload();
         ChatMessage original = (ChatMessage) pushed.getPacket().getPayload();
         socket.getPersistenceManager().persistPacket(packet);
-        
+
         if (shouldPass(socket, original)) {
-            if(!original.getParam(MessageField.TO_ROOM)) {
-                try {
-                    original.setMessage(socket.getSecurityManager().decrypt(original.getMessage()));
-                } catch (Exception e1) {
-                    Logging.getLogger().warning("Unable to decrypt message");
-                    return;
-                }
-            }
+            /*
+             * if(!original.getParam(MessageField.TO_ROOM)) { try {
+             * original.setMessage
+             * (socket.getSecurityManager().decrypt(original.getMessage())); }
+             * catch (Exception e1) {
+             * Logging.getLogger().warning("Unable to decrypt message"); return;
+             * } }
+             */
             socket.pushToClient(pushed.getPacket());
         }
     }
