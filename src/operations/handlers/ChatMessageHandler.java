@@ -21,7 +21,6 @@ public class ChatMessageHandler extends Handler {
 
     @Override
     public void process(ChatSocket sock, ChatPacket packet) {
-        Logging.getLogger().info("Got " + packet.getType());
         switch (packet.getType()) {
         case CHAT_MESSAGE:
             processChatMessage(sock, packet);
@@ -34,28 +33,31 @@ public class ChatMessageHandler extends Handler {
 
     public void processChatMessage(ChatSocket socket, ChatPacket packet) {
         ChatMessage msg = (ChatMessage) packet.getPayload();
-        if (msg.getParam(MessageField.TO_ROOM)) {
-            if (msg.getDest().equals(socket.getUUID())) {
-                try {
-                    socket.executeCommand(new PurgeCommand(msg.getMessageId()));
-                } catch (InvalidCommandException e) {
-                    Logging.getLogger().warning("Unable to execute Purge after receiving message.");
-                }
-            } else {
-                if (!socket.getPresenceManager().isPresent(msg.getDest(), socket.getUUID())) {
-                    return;
-                }
-            }
-            socket.pushToClient(packet);
-        } else if (!msg.getParam(MessageField.TO_ROOM) && msg.getDest().equals(socket.getUUID())) {
-            // Decrypt packet
+        if (msg.getParam(MessageField.PERSIST)) {
+            socket.getPersistenceManager().persistPacket(packet);
+        }
+        if (shouldPass(socket, msg)) {
             socket.pushToClient(packet);
         }
     }
 
     public void processPushMessage(ChatSocket socket, ChatPacket packet) {
-        Logging.getLogger().info("Got PushMessage");
         PushMessage pushed = (PushMessage) packet.getPayload();
-        socket.pushToClient(pushed.getPacket());
+        ChatMessage original = (ChatMessage) pushed.getPacket().getPayload();
+        socket.getPersistenceManager().persistPacket(packet);
+        
+        if (shouldPass(socket, original)) {
+            socket.pushToClient(pushed.getPacket());
+        }
+    }
+
+    private boolean shouldPass(ChatSocket socket, ChatMessage msg) {
+        if (msg.getParam(MessageField.TO_ROOM)
+                && socket.getPresenceManager().isPresent(msg.getDest(), socket.getUUID())) {
+            return true;
+        } else if (!msg.getParam(MessageField.TO_ROOM) && msg.getDest().equals(socket.getUUID())) {
+            return true;
+        }
+        return false;
     }
 }

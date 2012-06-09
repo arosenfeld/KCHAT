@@ -1,6 +1,8 @@
 package packets.messages;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 import packets.ChatPayload;
 import packets.ChatPacket.PacketType;
@@ -13,18 +15,15 @@ import util.PacketField;
 public class ManifestMessage implements ChatPayload {
     @PacketField(size = 16)
     private LongInteger src;
-    @PacketField(size = 4)
-    private int max;
     @PacketField(additional = 2)
-    private int[] seqs;
+    private Set<Integer> seqs;
 
     public ManifestMessage(byte[] data) {
         unPack(data);
     }
 
-    public ManifestMessage(LongInteger src, int max, int[] seqs) {
+    public ManifestMessage(LongInteger src, Set<Integer> seqs) {
         this.src = src;
-        this.max = max;
         this.seqs = seqs;
     }
 
@@ -32,11 +31,7 @@ public class ManifestMessage implements ChatPayload {
         return src;
     }
 
-    public int getMax() {
-        return max;
-    }
-
-    public int[] getSeqs() {
+    public Set<Integer> getSeqs() {
         return seqs;
     }
 
@@ -47,15 +42,15 @@ public class ManifestMessage implements ChatPayload {
 
     @Override
     public int getLength() {
-        return LengthCalculator.getLength(this) + seqs.length * 4;
+        return LengthCalculator.getLength(this) + seqs.size() * 4;
     }
 
     @Override
     public byte[] pack() throws IOException {
         PacketWriter pw = new PacketWriter();
         pw.writeLongInteger(src);
-        pw.writeShort((short) seqs.length);
-        for(int s : seqs) {
+        pw.writeShort((short) seqs.size());
+        for (int s : seqs) {
             pw.writeInt(s);
         }
         return pw.getArray();
@@ -65,10 +60,9 @@ public class ManifestMessage implements ChatPayload {
     public void unPack(byte[] data) {
         PacketReader pr = new PacketReader(data);
         src = pr.readLongInteger();
-        max = pr.readInt();
-        seqs = new int[pr.readShort()];
-        for (int i = 0; i < seqs.length; i++) {
-            seqs[i] = pr.readInt();
+        seqs = new HashSet<Integer>();
+        for (int i = 0; i < pr.readShort(); i++) {
+            seqs.add(pr.readInt());
         }
     }
 }

@@ -6,8 +6,10 @@ import java.io.InputStreamReader;
 
 import operations.commands.InvalidCommandException;
 import operations.commands.PresenceCommand;
+import operations.commands.RoomMessageCommand;
 import operations.commands.UserMessageCommand;
 import packets.ChatPacket;
+import packets.messages.RoomComparisonMessage;
 import transport.UdpMulticast;
 import util.Configuration;
 import util.LongInteger;
@@ -68,6 +70,11 @@ public class Main {
             } else {
                 System.out.println("Invalid: Must specify a room name and join/leave.");
             }
+        } else if (input.startsWith("msg-room")) {
+            if (split.length >= 2) {
+                int msgOffset = split[0].length() + split[1].length() + 1;
+                sock.executeCommand(new RoomMessageCommand(new LongInteger(split[1]), input.substring(msgOffset).getBytes()));
+            }
         } else if (input.startsWith("msg-user")) {
             if (split.length >= 3) {
                 boolean persist = split[2].toUpperCase().equals("Y");
@@ -80,6 +87,7 @@ public class Main {
             System.out.println("\tstatus <room> <join|leave>      : Joins/leaves <room>");
             System.out
                     .println("\tmsg-user <user> <persist> <msg> : Sends <user> the message <msg>.  If [persist] equals 'Y', it will be sent persistently");
+            System.out.println("\tmsg-room <room> <msg>           : Sends <room> the message <msg>");
             System.out.println("\trooms                           : Lists rooms and members");
             System.out.println("\thelp                            : Prints this help message");
         }

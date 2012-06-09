@@ -3,7 +3,10 @@ package core;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+
 import packets.ChatPacket;
 import packets.ChatPacket.PacketType;
 import packets.messages.ChatMessage;
@@ -27,10 +30,6 @@ public class PersistenceManager extends Thread {
         }
     }
 
-    public void setMax(LongInteger src, int max) {
-
-    }
-
     public void purgePacket(ChatPacket packet) {
         store.removePacket(packet);
     }
@@ -39,12 +38,16 @@ public class PersistenceManager extends Thread {
         return store.getPacket(src, persistenceId);
     }
 
+    public Set<Integer> getHeard(LongInteger src) {
+        return store.getHeard(src);
+    }
+
     @Override
     public void run() {
         while (true) {
             try {
                 for (LongInteger src : store.getSrcs()) {
-                    ManifestMessage manifest = new ManifestMessage(src, store.getMax(src), store.getHeard(src));
+                    ManifestMessage manifest = new ManifestMessage(src, store.getHeard(src));
                     sock.sendPacket(sock.wrapPayload(manifest));
                 }
                 Thread.sleep(sock.getGRTT());
@@ -89,31 +92,11 @@ public class PersistenceManager extends Thread {
             return messages.keySet().toArray(new LongInteger[messages.keySet().size()]);
         }
 
-        public synchronized int getMax(LongInteger src) {
+        public Set<Integer> getHeard(LongInteger src) {
             if (!messages.containsKey(src)) {
-                return 0;
+                return new HashSet<Integer>();
             }
-
-            int max = 0;
-            for (Integer perId : messages.get(src).keySet()) {
-                if (perId > max) {
-                    max = perId;
-                }
-            }
-            return max;
-        }
-
-        public int[] getHeard(LongInteger src) {
-            if (!messages.containsKey(src)) {
-                return new int[0];
-            }
-            int[] seqs = new int[messages.get(src).size()];
-            int i = 0;
-            for (int seq : messages.get(src).keySet()) {
-                seqs[i] = seq;
-                i++;
-            }
-            return seqs;
+            return messages.get(src).keySet();
         }
     }
 }

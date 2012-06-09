@@ -200,7 +200,6 @@ public class ChatSocket implements PacketCallback {
                         h.process(this, packet);
                     }
                 }
-                Logging.getLogger().info("New message: " + packet.getType());
             }
         }
     }
