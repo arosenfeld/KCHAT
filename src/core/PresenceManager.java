@@ -15,6 +15,12 @@ import util.Configuration;
 import util.Logging;
 import util.LongInteger;
 
+/**
+ * Handles maintenance of instance presences.
+ * 
+ * @author Aaron Rosenfeld <ar374@drexel.edu>
+ * 
+ */
 public class PresenceManager extends Thread {
     private Map<LongInteger, Room> presences;
     private ChatSocket sock;
@@ -69,9 +75,13 @@ public class PresenceManager extends Thread {
         return hash;
     }
 
+    /**
+     * Begins room advertisements.
+     */
     @Override
     public void run() {
         while (true) {
+            // Wait until a room is heard of or joined
             Room nextRoom;
             while ((nextRoom = nextTimer()) == null) {
                 try {
@@ -85,12 +95,15 @@ public class PresenceManager extends Thread {
 
             if (nextRoom.timerEndTime - Calendar.getInstance().getTimeInMillis() > 0) {
                 try {
+                    // Wait until the room with smallest timer is ready to
+                    // broadcast
                     Thread.sleep(nextRoom.timerEndTime - Calendar.getInstance().getTimeInMillis());
                 } catch (InterruptedException e1) {
                     Logging.getLogger().warning("Thread sleep interrupted.");
                 }
             }
 
+            // Send the RoomComparisonMessage and regenerate the timer
             try {
                 sock.sendPacket(sock.wrapPayload(new RoomComparisonMessage(nextRoom.name, hashMembers(nextRoom.name))));
                 nextRoom.generateTimer();
@@ -100,6 +113,11 @@ public class PresenceManager extends Thread {
         }
     }
 
+    /**
+     * Gets the room with smallest timer.
+     * 
+     * @return Room with smallest timer.
+     */
     private Room nextTimer() {
         Room min = null;
         for (LongInteger r : presences.keySet()) {
@@ -125,6 +143,12 @@ public class PresenceManager extends Thread {
         return sb.toString();
     }
 
+    /**
+     * Class representing a chat room.
+     * 
+     * @author Aaron Rosenfeld <ar374@drexel.edu>
+     * 
+     */
     private class Room {
         public LongInteger name;
         public Set<LongInteger> members;

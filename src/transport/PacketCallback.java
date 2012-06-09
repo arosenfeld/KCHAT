@@ -3,7 +3,7 @@ package transport;
 /**
  * Callback interface for classes which process packets.
  * 
- * @author arosenfeld
+ * @author Aaron Rosenfeld <ar374@drexel.edu>
  */
 public interface PacketCallback {
 

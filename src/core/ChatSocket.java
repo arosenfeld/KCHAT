@@ -30,6 +30,13 @@ import util.Configuration;
 import util.Logging;
 import util.LongInteger;
 
+/**
+ * The primary KCHAT class, which provides socket functionality to upper-layer
+ * applications.
+ * 
+ * @author Aaron Rosenfeld <ar374@drexel.edu>
+ * 
+ */
 public class ChatSocket implements PacketCallback {
     private TransportProtocol protocol;
     private PersistenceManager persistenceManager;
@@ -51,6 +58,18 @@ public class ChatSocket implements PacketCallback {
     private DuplicateFilter duplicates;
     private Map<LongInteger, Set<Integer>> passedToClient;
 
+    /**
+     * Creates a KCHAT socket.
+     * 
+     * @param protocol
+     *            An underlying multicast transport protocol.
+     * @param callback
+     *            A callback which will be invoked when messages are received.
+     * @param uuid
+     *            A globally unique ID for this socket.
+     * @param version
+     *            The version of the protocol
+     */
     public ChatSocket(TransportProtocol protocol, ChatPacketCallback callback, LongInteger uuid, byte version) {
         this.uuid = uuid;
         this.version = version;
@@ -84,17 +103,23 @@ public class ChatSocket implements PacketCallback {
         this(protocol, callback, new LongInteger(UUID.randomUUID()), (byte) 1);
     }
 
+    /**
+     * Starts the socket.
+     */
     public void start() {
+        // Start all the handlers of incoming packets
         this.handlers.add(new ChatMessageHandler());
         this.handlers.add(new PresenceHandler());
         this.handlers.add(new PersistenceHandler());
 
+        // Start the managers
         this.presenceManager.start();
         this.persistenceManager.start();
 
+        // Start the MC socket
         this.protocol.start();
 
-        // Public key exchange
+        // Publish the local public key to room 0
         ChatPacket packet = wrapPayload(new ChatMessage(getNextMessageId(), getNextPersistId(), new LongInteger(),
                 securityManager.getMyPublicKey()));
         try {
@@ -149,14 +174,32 @@ public class ChatSocket implements PacketCallback {
         return grtt;
     }
 
+    /**
+     * Adds a sample of the group-round-trip-time.
+     * 
+     * @param time
+     *            Time between send and receive in milliseconds.
+     */
     public void addSampledGRTT(int time) {
         grtt = Math.min((int) (.8 * grtt + .2 * time), Configuration.getInstance().getValueAsInt("timer.grtt_max"));
     }
 
+    /**
+     * Doubles the GRTT. Used when a response to a message is not received.
+     */
     public void doubleGRTT() {
         grtt *= 2;
     }
 
+    /**
+     * Pushes a message to the instantiating application.
+     * 
+     * @param packet
+     *            The packet to push.
+     * @param forcePush
+     *            If the packet should be forced to the application, ignoring
+     *            duplicates.
+     */
     public void pushToClient(ChatPacket packet, boolean forcePush) {
         if (!passedToClient.containsKey(packet.getSrc())) {
             passedToClient.put(packet.getSrc(), new HashSet<Integer>());
@@ -181,6 +224,14 @@ public class ChatSocket implements PacketCallback {
         return new ChatPacket(version, getNextSeq(), uuid, pld);
     }
 
+    /**
+     * Executes an application command on the socket (e.g. join a room, send a
+     * message)
+     * 
+     * @param cmd
+     *            The command to execute.
+     * @throws InvalidCommandException
+     */
     public void executeCommand(final Command cmd) throws InvalidCommandException {
         cmd.invoke(this);
     }
@@ -189,11 +240,23 @@ public class ChatSocket implements PacketCallback {
         protocol.send(packet.pack());
     }
 
+    /**
+     * Waits at most a specific amount of time for a packet.
+     * 
+     * @param timeout
+     *            The time to wait.
+     * @param matcher
+     *            A matcher to select a packet.
+     * @return
+     */
     public synchronized ChatPacket waitFor(int timeout, PacketMatcher matcher) {
         try {
+            // Determine the raw time to end
             long endTime = Calendar.getInstance().getTimeInMillis() + timeout;
             long waitTime;
+            // While no matching packet has been received
             do {
+                // If the time has expired, return null
                 if ((waitTime = endTime - Calendar.getInstance().getTimeInMillis()) <= 0) {
                     return null;
                 }
@@ -206,16 +269,23 @@ public class ChatSocket implements PacketCallback {
         return null;
     }
 
+    /**
+     * Processes an incoming raw packet.
+     */
     @Override
     public synchronized void processPacket(byte[] data) {
         ChatPacket packet = new ChatPacket(data);
+        // If its a duplicate, or from the local instance, drop the packet
         if (!duplicates.heard(packet) && !packet.getSrc().equals(uuid)) {
 
+            // Basic packet checking
             if (packet.getPayload() != null && packet.getPayload().getType() == packet.getType()) {
                 duplicates.add(packet);
                 last = packet;
+                // Notify anything that is blocked on waitFor()
                 notifyAll();
 
+                // Pass it to all the handlers
                 for (Handler h : handlers) {
                     if (h.accepts(packet)) {
                         h.process(this, packet);
@@ -225,6 +295,12 @@ public class ChatSocket implements PacketCallback {
         }
     }
 
+    /**
+     * Class providing duplicate filtering.
+     * 
+     * @author Aaron Rosenfeld <ar374@drexel.edu>
+     * 
+     */
     private class DuplicateFilter {
         private LinkedHashSet<ChatPacket> heard;
         private int maxSize;

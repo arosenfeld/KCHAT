@@ -10,6 +10,12 @@ import packets.messages.RoomStatusMessage;
 import packets.messages.UserPresenceMessage;
 import packets.messages.UserStatusMessage;
 
+/**
+ * Creates ChatPayloads from a raw byte array and packet type.
+ * 
+ * @author Aaron Rosenfeld <ar374@drexel.edu>
+ * 
+ */
 public class ChatPayloadCreator {
     public static ChatPayload createPayload(PacketType type, byte[] packedPayload) {
         // TODO: There may be a better way to do this...

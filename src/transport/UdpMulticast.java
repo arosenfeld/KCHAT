@@ -10,7 +10,7 @@ import java.net.SocketException;
  * Wrapper for MulticastSocket. Provides simple multicast send/recv
  * functionality.
  * 
- * @author arosenfeld
+ * @author Aaron Rosenfeld <ar374@drexel.edu>
  */
 public class UdpMulticast extends TransportProtocol {
 

@@ -5,7 +5,7 @@ import java.net.UnknownHostException;
 
 /**
  * 
- * @author arosenfeld
+ * @author Aaron Rosenfeld <ar374@drexel.edu>
  */
 public abstract class TransportProtocol extends Thread {
 

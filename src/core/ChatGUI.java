@@ -432,10 +432,10 @@ public class ChatGUI extends JFrame implements ChatPacketCallback {
 
     @Override
     public void receivePacket(ChatPacket packet) {
-        if(packet.getType() == PacketType.CHAT_MESSAGE) {
+        if (packet.getType() == PacketType.CHAT_MESSAGE) {
             ChatMessage message = (ChatMessage) packet.getPayload();
             // Got a message
-        } else if(packet.getType() == PacketType.USER_PRESENCE) {
+        } else if (packet.getType() == PacketType.USER_PRESENCE) {
             UserPresenceMessage pres = (UserPresenceMessage) packet.getPayload();
             // Someone joined or left a room
         }

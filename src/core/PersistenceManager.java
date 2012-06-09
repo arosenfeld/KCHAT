@@ -18,6 +18,12 @@ import packets.messages.ChatMessage.MessageField;
 import util.Logging;
 import util.LongInteger;
 
+/**
+ * Maintains messages persistently, and handles periodic manifest transmissions.
+ * 
+ * @author Aaron Rosenfeld <ar374@drexel.edu>
+ * 
+ */
 public class PersistenceManager extends Thread {
     private MessageStore store;
     private ChatSocket sock;
@@ -43,6 +49,13 @@ public class PersistenceManager extends Thread {
         return store.getHeard(src);
     }
 
+    /**
+     * Gets the packets from a specific room.
+     * 
+     * @param room
+     *            The room name.
+     * @return Packets bound for the room
+     */
     public ChatPacket[] getRoomMessages(LongInteger room) {
         // TODO: Fix this
         if (!store.messages.containsKey(room)) {

@@ -14,6 +14,12 @@ import util.Logging;
 import util.LongInteger;
 import core.ChatSocket;
 
+/**
+ * A command to send a message to a specific instance
+ * 
+ * @author Aaron Rosenfeld <ar374@drexel.edu>
+ * 
+ */
 public class UserMessageCommand extends Command {
     private LongInteger dest;
     private byte[] message;
@@ -28,11 +34,14 @@ public class UserMessageCommand extends Command {
 
     @Override
     public void invoke(final ChatSocket socket) throws InvalidCommandException {
+        // The user with address zero is reserved
         if (dest.equals(new LongInteger())) {
             throw new InvalidCommandException("Cannot send to user with address zero");
         }
+        // Bump the seq number
         sentMessageId = socket.getNextSeq();
 
+        // Assure the local instance has a public key for the destination user
         if (socket.getSecurityManager().userHasPublicKey(dest)) {
             try {
                 message = socket.getSecurityManager().encrypt(dest, message);
@@ -45,13 +54,18 @@ public class UserMessageCommand extends Command {
 
         synchronized (socket) {
             try {
+                // Create the message
                 final ChatMessage msg = new ChatMessage(socket.getNextMessageId(), dest, message);
-                if (dest == socket.getUUID()) {
+                if (dest.equals(socket.getUUID())) {
+                    // If the user is sending to themself, don't involve the
+                    // network
                     socket.pushToClient(socket.wrapPayload(msg));
                 } else {
                     // Send the message
                     socket.sendPacket(socket.wrapPayload(msg));
 
+                    // If the message is persistent, we must wait for a PURGE or
+                    // otherwise store the message for later delivery.
                     if (persist) {
                         new Thread(new Runnable() {
 
@@ -72,6 +86,17 @@ public class UserMessageCommand extends Command {
         }
     }
 
+    /**
+     * After sending a persistent message, waits for a PURGE message. If one
+     * isn't received, mark the message as persistent, store it locally, and
+     * resend it with the PERSIST flag set to true.
+     * 
+     * @param socket
+     *            The KCHAT socket.
+     * @param msg
+     *            The message that was sent.
+     * @throws IOException
+     */
     private void checkPersistence(ChatSocket socket, ChatMessage msg) throws IOException {
         // Wait for a purge message
         long start = Calendar.getInstance().getTimeInMillis();

@@ -6,6 +6,12 @@ import java.security.*;
 import javax.crypto.*;
 import util.LongInteger;
 
+/**
+ * Maintains all key information for KCHAT.
+ * 
+ * @author Andrew Townsley <at637@drexel.edu>
+ * 
+ */
 public class Security {
 
     private static PrivateKey myPrivKey;

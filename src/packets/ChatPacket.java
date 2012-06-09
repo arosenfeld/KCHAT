@@ -10,7 +10,16 @@ import util.LengthCalculator;
 import util.LongInteger;
 import util.PacketField;
 
+/**
+ * Handles encoding and decoding of all KCHAT packets. The payload varies
+ * depending on the PacketType, but all header information is constant as
+ * described in the design document.
+ * 
+ * @author Aaron Rosenfeld <ar374@drexel.edu>
+ * 
+ */
 public class ChatPacket implements Packable {
+    // Enum for each packet type
     public enum PacketType {
         UNDEFINED(0), CHAT_MESSAGE(1), USER_PRESENCE(2), ROOM_COMPARISON(3), ROOM_STATUS(4), USER_STATUS(5), PURGE(6), MANIFEST(
                 7), PUSH(8);
@@ -35,6 +44,7 @@ public class ChatPacket implements Packable {
         }
     }
 
+    // Header fields and associated sizes
     @PacketField(size = 1)
     private byte version;
     @PacketField(size = 16)
@@ -47,10 +57,30 @@ public class ChatPacket implements Packable {
     private byte[][] extensions;
     private ChatPayload payload;
 
+    /**
+     * Unpacks a byte array into a ChatPacket instance.
+     * 
+     * @param data
+     *            The raw byte array.
+     */
     public ChatPacket(byte[] data) {
         unPack(data);
     }
 
+    /**
+     * Creates a ChatPacket from local information.
+     * 
+     * @param version
+     *            The protocol version.
+     * @param sequence
+     *            The sequence number of the packet.
+     * @param src
+     *            The source of the packet
+     * @param payload
+     *            The payload of the packet.
+     * @param extensions
+     *            Any extensions to the packet.
+     */
     public ChatPacket(byte version, int sequence, LongInteger src, ChatPayload payload, byte[][] extensions) {
         this.version = version;
         this.sequence = sequence;
