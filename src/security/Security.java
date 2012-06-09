@@ -38,23 +38,23 @@ public class Security {
         return cipher.doFinal(msg);
     }
 
-    public void RemovePublicKey(LongInteger userId) {
+    public void removePublicKey(LongInteger userId) {
         if (pubKeys.containsKey(userId)) {
             pubKeys.remove(userId);
         }
     }
 
-    public byte[] SendMyPublicKey() {
+    public byte[] getMyPublicKey() {
         return myPubKey.getEncoded();
     }
 
-    public void SaveUserPublicKey(LongInteger userId, byte[] bytes) throws NoSuchAlgorithmException,
+    public void saveUserPublicKey(LongInteger userId, byte[] bytes) throws NoSuchAlgorithmException,
             InvalidKeySpecException {
         PublicKey pubKey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(bytes));
         pubKeys.put(userId, pubKey);
     }
 
-    public boolean UserHasPublicKey(LongInteger userId) {
+    public boolean userHasPublicKey(LongInteger userId) {
         return pubKeys.containsKey(userId);
     }
 }
