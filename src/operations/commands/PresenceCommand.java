@@ -43,9 +43,7 @@ public class PresenceCommand extends Command {
             // If the client is joining a room, bring the them up to date by
             // pushing previous messages
             if (status == PresenceStatus.JOIN) {
-                Logging.getLogger().info(socket.getPersistenceManager().toString());
                 for (ChatPacket p : socket.getPersistenceManager().getRoomMessages(roomName)) {
-                    Logging.getLogger().info("Pushing " + p.getSequence());
                     socket.pushToClient(p, true);
                 }
             }

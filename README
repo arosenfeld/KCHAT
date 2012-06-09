@@ -1,0 +1,127 @@
+============ Overview ============
+
+Group: 4
+Members: Chong Liu, Aaron Rosenfeld, Oyesanmi Taiwo, Andrew Townsley
+Protocol: KCHAT
+
+============ Restrictions ============
+
+All clients must be one the same subnet.  More specifically, they must all be on a network
+which allows them to send multicast packets to each other.  Further all usernames must be 
+unique.
+
+============ Building & Running ============
+
+To build:
+
+    ant
+
+To run:
+
+    Viw kchat.properties and assure udp.iface is set to the interface name desired for use,
+    and that udp.host and udp.port are the same across all clients.
+
+    java -jar dist/KCHAT.jar
+
+    You will be prompted for a username.  After that, typing 'help' will display all commands.
+
+
+============ Robustness ============
+
+KCHAT should be reasonably robust, and has been tested with some malformed packets.  Under 
+heavy fuzzing, it's possible that there will be errors however.  Further, there is no simple
+way to assure usernames are unique, and its possible for a client to receive messages destined
+for another client if they duplicate their username.
+
+============ Extra Credit ============
+
+KCHAT achieves finding the ``server'' natively since the multicast channel is fixed.  If our 
+application was client/server based, we would have used multicast to find the server.  In fact,
+it's entirely possible for other applications to utilize KCHAT to find a server.
+
+============ Sample Run ============
+
+Below is a sample run with two clients conversing:
+
+========================================================
+>>> CLIENT ONE
+========================================================
+Username: joe
+Starting socket with ID joe
+Type 'help' for information or Ctrl-C to exit.
+> status testroom join
+> ! Received Packet 
+Version: 1
+Src: sally
+Type: USER_PRESENCE
+Seq: 23
+Payload: 
+
+Room Name: testroom
+Status: JOIN
+
+
+----------------------------
+msg-room testroom This is a test!
+> status testroom leave
+> msg-user sally Something secret
+
+========================================================
+>>> CLIENT TWO
+========================================================
+Username: sally
+Starting socket with ID sally
+Type 'help' for information or Ctrl-C to exit.
+> ! Received Packet 
+Version: 1
+Src: joe
+Type: USER_PRESENCE
+Seq: 10
+Payload: 
+
+Room Name: testroom
+Status: JOIN
+
+
+----------------------------
+status testroom join
+> ! Received Packet 
+Version: 1
+Src: joe
+Type: CHAT_MESSAGE
+Seq: 44
+Payload: 
+
+Params: 3
+PersistenceId: 2
+Dest: testroom
+Message:  This is a test!
+
+
+----------------------------
+! Received Packet 
+Version: 1
+Src: joe
+Type: USER_PRESENCE
+Seq: 69
+Payload: 
+
+Room Name: testroom
+Status: LEAVE
+
+
+----------------------------
+! Received Packet 
+Version: 1
+Src: joe
+Type: CHAT_MESSAGE
+Seq: 109
+Payload: 
+
+Params: 0
+PersistenceId: 0
+Dest: sally
+Message: something secret
+
+
+----------------------------
