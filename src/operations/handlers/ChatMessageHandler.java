@@ -46,7 +46,7 @@ public class ChatMessageHandler extends Handler {
             }
 
             if (!alreadyPassedToClient(packet)) {
-                sock.getClientCallback().receivePacket(packet);
+                sock.pushToClient(packet);
             }
         }
     }

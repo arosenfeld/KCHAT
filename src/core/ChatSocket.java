@@ -9,12 +9,18 @@ import operations.handlers.PresenceHandler;
 
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import packets.ChatPacket;
 import packets.ChatPayload;
+import packets.messages.ChatMessage;
 import security.Security;
 import transport.PacketCallback;
 import transport.TransportProtocol;
@@ -41,6 +47,7 @@ public class ChatSocket implements PacketCallback {
 
     private ChatPacket last;
     private DuplicateFilter duplicates;
+    private Map<LongInteger, Set<Integer>> passedToClient;
 
     public ChatSocket(TransportProtocol protocol, ChatPacketCallback callback, LongInteger uuid, byte version) {
         this.uuid = uuid;
@@ -62,6 +69,7 @@ public class ChatSocket implements PacketCallback {
         this.clientCallback = callback;
         this.duplicates = new DuplicateFilter(500);
         this.handlers = new LinkedList<Handler>();
+        passedToClient = Collections.synchronizedMap(new HashMap<LongInteger, Set<Integer>>());
     }
 
     public ChatSocket(TransportProtocol protocol, ChatPacketCallback callback, LongInteger uuid) {
@@ -88,6 +96,10 @@ public class ChatSocket implements PacketCallback {
 
     public PresenceManager getPresenceManager() {
         return presenceManager;
+    }
+
+    public PersistenceManager getPersistenceManager() {
+        return persistenceManager;
     }
 
     public Security getSecurityManager() {
@@ -130,8 +142,16 @@ public class ChatSocket implements PacketCallback {
         grtt *= 2;
     }
 
-    public ChatPacketCallback getClientCallback() {
-        return clientCallback;
+    public void pushToClient(ChatPacket packet) {
+        if (!passedToClient.containsKey(packet.getSrc())) {
+            passedToClient.put(packet.getSrc(), new HashSet<Integer>());
+        }
+
+        int msgId = ((ChatMessage) packet.getPayload()).getMessageId();
+        if (!passedToClient.get(packet.getSrc()).contains(msgId)) {
+            passedToClient.get(packet.getSrc()).add(msgId);
+            clientCallback.receivePacket(packet);
+        }
     }
 
     public ChatPacket wrapPayload(ChatPayload pld) {

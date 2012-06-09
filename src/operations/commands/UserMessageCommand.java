@@ -44,21 +44,25 @@ public class UserMessageCommand extends Command {
         synchronized (socket) {
             try {
                 final ChatMessage msg = new ChatMessage(socket.getNextMessageId(), dest, message);
-                // Send the message
-                socket.sendPacket(socket.wrapPayload(msg));
+                if (dest == socket.getUUID()) {
+                    socket.pushToClient(socket.wrapPayload(msg));
+                } else {
+                    // Send the message
+                    socket.sendPacket(socket.wrapPayload(msg));
 
-                if (persist) {
-                    new Thread(new Runnable() {
+                    if (persist) {
+                        new Thread(new Runnable() {
 
-                        @Override
-                        public void run() {
-                            try {
-                                checkPersistence(socket, msg);
-                            } catch (IOException e) {
-                                Logging.getLogger().warning("Unable to maintain persistence");
+                            @Override
+                            public void run() {
+                                try {
+                                    checkPersistence(socket, msg);
+                                } catch (IOException e) {
+                                    Logging.getLogger().warning("Unable to maintain persistence");
+                                }
                             }
-                        }
-                    }).start();
+                        }).start();
+                    }
                 }
             } catch (IOException e) {
                 Logging.getLogger().warning("Unable to send user message");
@@ -82,7 +86,9 @@ public class UserMessageCommand extends Command {
             Logging.getLogger().info("Persist set and no response received.");
             msg.setParam(MessageField.PERSIST, true);
             msg.setPersistenceId(socket.getNextPersistId());
-            socket.sendPacket(socket.wrapPayload(msg));
+            ChatPacket packet = socket.wrapPayload(msg);
+            socket.getPersistenceManager().persistPacket(packet);
+            socket.sendPacket(packet);
         }
     }
 

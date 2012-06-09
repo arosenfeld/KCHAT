@@ -2,6 +2,7 @@ package operations.commands;
 
 import java.io.IOException;
 
+import packets.ChatPacket;
 import packets.messages.ChatMessage;
 import packets.messages.ChatMessage.MessageField;
 import util.LongInteger;
@@ -22,7 +23,14 @@ public class RoomMessageCommand extends Command {
             ChatMessage msg = new ChatMessage(socket.getNextMessageId(), socket.getNextPersistId(), dest, message);
             msg.setParam(MessageField.TO_ROOM, true);
             msg.setParam(MessageField.PERSIST, true);
-            socket.sendPacket(socket.wrapPayload(msg));
+
+            ChatPacket packet = socket.wrapPayload(msg);
+            socket.getPersistenceManager().persistPacket(packet);
+
+            if (socket.getPresenceManager().isPresent(socket.getUUID(), dest)) {
+                socket.pushToClient(packet);
+            }
+            socket.sendPacket(packet);
         } catch (IOException e) {
             throw new InvalidCommandException("Unable to send ChatMessage to room");
         }
