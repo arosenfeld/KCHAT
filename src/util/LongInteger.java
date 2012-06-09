@@ -24,6 +24,9 @@ public class LongInteger {
 
     public LongInteger() {
         value = new byte[16];
+        for (int i = 0; i < value.length; i++) {
+            value[i] = 0;
+        }
     }
 
     public void setValue(byte[] setValue) {
@@ -32,7 +35,7 @@ public class LongInteger {
         }
 
         value = new byte[16];
-        for (int i = 0; i < 16; i++) {
+        for (int i = 0; i < value.length; i++) {
             if (i < setValue.length) {
                 value[i] = setValue[i];
             } else {

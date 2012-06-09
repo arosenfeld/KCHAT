@@ -92,6 +92,16 @@ public class ChatSocket implements PacketCallback {
         this.persistenceManager.start();
 
         this.protocol.start();
+
+        // Public key exchange
+        ChatPacket packet = wrapPayload(new ChatMessage(getNextMessageId(), getNextPersistId(), new LongInteger(),
+                securityManager.getMyPublicKey()));
+        try {
+            sendPacket(packet);
+            getPersistenceManager().persistPacket(packet);
+        } catch (IOException e) {
+            Logging.getLogger().warning("Unable to send Public Key");
+        }
     }
 
     public void stop() {

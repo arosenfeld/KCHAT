@@ -19,6 +19,9 @@ public class RoomMessageCommand extends Command {
 
     @Override
     public void invoke(ChatSocket socket) throws InvalidCommandException {
+        if (dest.equals(new LongInteger())) {
+            throw new InvalidCommandException("Cannot send to room with address zero");
+        }
         try {
             ChatMessage msg = new ChatMessage(socket.getNextMessageId(), socket.getNextPersistId(), dest, message);
             msg.setParam(MessageField.TO_ROOM, true);

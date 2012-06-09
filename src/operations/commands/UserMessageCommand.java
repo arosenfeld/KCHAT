@@ -28,16 +28,20 @@ public class UserMessageCommand extends Command {
 
     @Override
     public void invoke(final ChatSocket socket) throws InvalidCommandException {
+        if (dest.equals(new LongInteger())) {
+            throw new InvalidCommandException("Cannot send to user with address zero");
+        }
         sentMessageId = socket.getNextSeq();
 
-        /*
-         * if (socket.getSecurityManager().UserHasPublicKey(dest)) { try {
-         * message = socket.getSecurityManager().encrypt(dest, message); } catch
-         * (Exception e1) { throw new
-         * InvalidCommandException("Unable to encrypt message."); } } else {
-         * throw new InvalidCommandException("Unable to send to " + dest +
-         * ".  No know public key."); }
-         */
+        if (socket.getSecurityManager().userHasPublicKey(dest)) {
+            try {
+                message = socket.getSecurityManager().encrypt(dest, message);
+            } catch (Exception e1) {
+                throw new InvalidCommandException("Unable to encrypt message.");
+            }
+        } else {
+            throw new InvalidCommandException("Unable to send to " + dest + ".  No known public key.");
+        }
 
         synchronized (socket) {
             try {

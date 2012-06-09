@@ -19,7 +19,7 @@ public class Security {
 
     private static void buildKeys() throws Exception {
         KeyPairGenerator kg = KeyPairGenerator.getInstance("RSA");
-        kg.initialize(2048);
+        kg.initialize(512);
 
         KeyPair pair = kg.genKeyPair();
         myPrivKey = pair.getPrivate();
