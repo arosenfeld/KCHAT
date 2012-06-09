@@ -2,6 +2,8 @@ package core;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -25,14 +27,13 @@ public class PersistenceManager extends Thread {
             store.addPacket(packet);
         }
     }
-    
+
     public void purgePacket(ChatPacket packet) {
         store.removePacket(packet);
     }
-    
+
     @Override
     public void run() {
-        
     }
 
     private class MessageStore {
@@ -56,6 +57,33 @@ public class PersistenceManager extends Thread {
             if (messages.containsKey(p.getSrc())) {
                 messages.get(p.getSrc()).remove(p);
             }
+        }
+
+        public Range[] getMissing(LongInteger src) {
+            if (!messages.containsKey(src)) {
+                return null;
+            }
+            List<Range> ranges = new LinkedList<Range>();
+            int last = 0;
+            Integer[] seqs = messages.get(src).keySet().toArray(new Integer[messages.get(src).size()]);
+            for (int i = 0; i < seqs.length; i++) {
+                if (last + 1 != seqs[i]) {
+                    ranges.add(new Range(last + 1, seqs[i] - (last + 1)));
+                }
+                last = seqs[i];
+            }
+            
+            return ranges.toArray(new Range[ranges.size()]);
+        }
+    }
+
+    private class Range {
+        public int start;
+        public int size;
+
+        public Range(int start, int size) {
+            this.start = start;
+            this.size = size;
         }
     }
 }
