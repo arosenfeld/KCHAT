@@ -2,8 +2,6 @@ package packets.messages;
 
 import java.io.IOException;
 
-import core.PersistenceManager.Range;
-
 import packets.ChatPayload;
 import packets.ChatPacket.PacketType;
 import packing.PacketReader;
@@ -15,24 +13,31 @@ import util.PacketField;
 public class ManifestMessage implements ChatPayload {
     @PacketField(size = 16)
     private LongInteger src;
+    @PacketField(size = 4)
+    private int max;
     @PacketField(additional = 2)
-    private Range[] ranges;
+    private int[] seqs;
 
     public ManifestMessage(byte[] data) {
         unPack(data);
     }
 
-    public ManifestMessage(LongInteger src, Range[] ranges) {
+    public ManifestMessage(LongInteger src, int max, int[] seqs) {
         this.src = src;
-        this.ranges = ranges;
+        this.max = max;
+        this.seqs = seqs;
     }
 
     public LongInteger getSrc() {
         return src;
     }
 
-    public Range[] getRanges() {
-        return ranges;
+    public int getMax() {
+        return max;
+    }
+
+    public int[] getSeqs() {
+        return seqs;
     }
 
     @Override
@@ -42,17 +47,16 @@ public class ManifestMessage implements ChatPayload {
 
     @Override
     public int getLength() {
-        return LengthCalculator.getLength(this) + ranges.length * 5;
+        return LengthCalculator.getLength(this) + seqs.length * 4;
     }
 
     @Override
     public byte[] pack() throws IOException {
         PacketWriter pw = new PacketWriter();
         pw.writeLongInteger(src);
-        pw.writeShort((short) ranges.length);
-        for (Range r : ranges) {
-            pw.writeInt(r.start);
-            pw.writeShort(r.size);
+        pw.writeShort((short) seqs.length);
+        for(int s : seqs) {
+            pw.writeInt(s);
         }
         return pw.getArray();
     }
@@ -61,9 +65,10 @@ public class ManifestMessage implements ChatPayload {
     public void unPack(byte[] data) {
         PacketReader pr = new PacketReader(data);
         src = pr.readLongInteger();
-        ranges = new Range[pr.readShort()];
-        for (int i = 0; i < ranges.length; i++) {
-            ranges[i] = new Range(pr.readInt(), pr.readShort());
+        max = pr.readInt();
+        seqs = new int[pr.readShort()];
+        for (int i = 0; i < seqs.length; i++) {
+            seqs[i] = pr.readInt();
         }
     }
 }

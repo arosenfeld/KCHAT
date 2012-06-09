@@ -3,11 +3,7 @@ package core;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
-
 import packets.ChatPacket;
 import packets.ChatPacket.PacketType;
 import packets.messages.ChatMessage;
@@ -31,6 +27,10 @@ public class PersistenceManager extends Thread {
         }
     }
 
+    public void setMax(LongInteger src, int max) {
+
+    }
+
     public void purgePacket(ChatPacket packet) {
         store.removePacket(packet);
     }
@@ -44,7 +44,7 @@ public class PersistenceManager extends Thread {
         while (true) {
             try {
                 for (LongInteger src : store.getSrcs()) {
-                    ManifestMessage manifest = new ManifestMessage(src, store.getMissing(src));
+                    ManifestMessage manifest = new ManifestMessage(src, store.getMax(src), store.getHeard(src));
                     sock.sendPacket(sock.wrapPayload(manifest));
                 }
                 Thread.sleep(sock.getGRTT());
@@ -57,16 +57,16 @@ public class PersistenceManager extends Thread {
     }
 
     private class MessageStore {
-        private Map<LongInteger, TreeMap<Integer, ChatPacket>> messages;
+        private Map<LongInteger, HashMap<Integer, ChatPacket>> messages;
 
         public MessageStore() {
-            messages = Collections.synchronizedMap(new HashMap<LongInteger, TreeMap<Integer, ChatPacket>>());
+            messages = Collections.synchronizedMap(new HashMap<LongInteger, HashMap<Integer, ChatPacket>>());
         }
 
         public synchronized void addPacket(ChatPacket p) {
             if (p.getType() == PacketType.CHAT_MESSAGE) {
                 if (!messages.containsKey(p.getSrc())) {
-                    messages.put(p.getSrc(), new TreeMap<Integer, ChatPacket>());
+                    messages.put(p.getSrc(), new HashMap<Integer, ChatPacket>());
                 }
                 messages.get(p.getSrc()).put(((ChatMessage) p.getPayload()).getPersistenceId(), p);
             }
@@ -89,30 +89,31 @@ public class PersistenceManager extends Thread {
             return messages.keySet().toArray(new LongInteger[messages.keySet().size()]);
         }
 
-        public synchronized Range[] getMissing(LongInteger src) {
+        public synchronized int getMax(LongInteger src) {
             if (!messages.containsKey(src)) {
-                return new Range[0];
+                return 0;
             }
-            List<Range> ranges = new LinkedList<Range>();
-            int last = 0;
-            Integer[] seqs = messages.get(src).keySet().toArray(new Integer[messages.get(src).size()]);
-            for (int i = 0; i < seqs.length; i++) {
-                if (last + 1 != seqs[i]) {
-                    ranges.add(new Range(last + 1, (short) (seqs[i] - (last + 1))));
+
+            int max = 0;
+            for (Integer perId : messages.get(src).keySet()) {
+                if (perId > max) {
+                    max = perId;
                 }
-                last = seqs[i];
             }
-            return ranges.toArray(new Range[ranges.size()]);
+            return max;
         }
-    }
 
-    public static class Range {
-        public int start;
-        public short size;
-
-        public Range(int start, short size) {
-            this.start = start;
-            this.size = size;
+        public int[] getHeard(LongInteger src) {
+            if (!messages.containsKey(src)) {
+                return new int[0];
+            }
+            int[] seqs = new int[messages.get(src).size()];
+            int i = 0;
+            for (int seq : messages.get(src).keySet()) {
+                seqs[i] = seq;
+                i++;
+            }
+            return seqs;
         }
     }
 }

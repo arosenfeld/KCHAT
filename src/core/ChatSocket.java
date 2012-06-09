@@ -5,6 +5,7 @@ import operations.commands.Command;
 import operations.commands.InvalidCommandException;
 import operations.handlers.Handler;
 import operations.handlers.ChatMessageHandler;
+import operations.handlers.PersistenceHandler;
 import operations.handlers.PresenceHandler;
 
 import java.io.IOException;
@@ -83,6 +84,7 @@ public class ChatSocket implements PacketCallback {
     public void start() {
         this.handlers.add(new ChatMessageHandler());
         this.handlers.add(new PresenceHandler());
+        this.handlers.add(new PersistenceHandler());
 
         this.presenceManager.start();
         this.persistenceManager.start();
@@ -198,8 +200,7 @@ public class ChatSocket implements PacketCallback {
                         h.process(this, packet);
                     }
                 }
-            } else {
-                Logging.getLogger().warning("Invalid payload.  Message ignored.");
+                Logging.getLogger().info("New message: " + packet.getType());
             }
         }
     }

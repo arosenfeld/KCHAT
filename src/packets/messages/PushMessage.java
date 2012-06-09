@@ -2,6 +2,7 @@ package packets.messages;
 
 import java.io.IOException;
 
+import packets.ChatPacket;
 import packets.ChatPayload;
 import packets.ChatPacket.PacketType;
 import packing.PacketReader;
@@ -13,11 +14,23 @@ import util.PacketField;
 public class PushMessage implements ChatPayload {
     @PacketField(size = 16)
     private LongInteger originalSrc;
-    private ChatMessage msg;
+    private ChatPacket packet;
 
-    public PushMessage(LongInteger originalSrc, ChatMessage msg) {
+    public PushMessage(byte[] data) {
+        unPack(data);
+    }
+
+    public PushMessage(LongInteger originalSrc, ChatPacket packet) {
         this.originalSrc = originalSrc;
-        this.msg = msg;
+        this.packet = packet;
+    }
+
+    public LongInteger getOriginalSrc() {
+        return originalSrc;
+    }
+
+    public ChatPacket getPacket() {
+        return packet;
     }
 
     @Override
@@ -27,14 +40,14 @@ public class PushMessage implements ChatPayload {
 
     @Override
     public int getLength() {
-        return LengthCalculator.getLength(this) + msg.getLength();
+        return LengthCalculator.getLength(this) + packet.getLength();
     }
 
     @Override
     public byte[] pack() throws IOException {
         PacketWriter pw = new PacketWriter();
         pw.writeLongInteger(originalSrc);
-        pw.writeBytes(msg.pack());
+        pw.writeBytes(packet.pack());
         return pw.getArray();
     }
 
@@ -42,6 +55,6 @@ public class PushMessage implements ChatPayload {
     public void unPack(byte[] data) {
         PacketReader pr = new PacketReader(data);
         originalSrc = pr.readLongInteger();
-        msg = new ChatMessage(pr.getRemainder());
+        packet = new ChatPacket(pr.getRemainder());
     }
 }

@@ -2,7 +2,9 @@ package packets;
 
 import packets.ChatPacket.PacketType;
 import packets.messages.ChatMessage;
+import packets.messages.ManifestMessage;
 import packets.messages.PurgeMessage;
+import packets.messages.PushMessage;
 import packets.messages.RoomComparisonMessage;
 import packets.messages.RoomStatusMessage;
 import packets.messages.UserPresenceMessage;
@@ -14,8 +16,12 @@ public class ChatPayloadCreator {
         switch (type) {
         case CHAT_MESSAGE:
             return new ChatMessage(packedPayload);
+        case MANIFEST:
+            return new ManifestMessage(packedPayload);
         case PURGE:
             return new PurgeMessage(packedPayload);
+        case PUSH:
+            return new PushMessage(packedPayload);
         case ROOM_COMPARISON:
             return new RoomComparisonMessage(packedPayload);
         case ROOM_STATUS:
