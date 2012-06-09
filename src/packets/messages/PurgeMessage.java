@@ -2,13 +2,11 @@ package packets.messages;
 
 import java.io.IOException;
 
-import packets.ChatPacket;
 import packets.ChatPayload;
 import packets.ChatPacket.PacketType;
 import packing.PacketReader;
 import packing.PacketWriter;
 import util.LengthCalculator;
-import util.Logging;
 import util.PacketField;
 
 public class PurgeMessage implements ChatPayload {

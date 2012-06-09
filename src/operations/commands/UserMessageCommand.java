@@ -10,7 +10,6 @@ import packets.ChatPacket.PacketType;
 import packets.messages.ChatMessage;
 import packets.messages.PurgeMessage;
 import packets.messages.ChatMessage.MessageField;
-import util.Configuration;
 import util.Logging;
 import util.LongInteger;
 import core.ChatSocket;

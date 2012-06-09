@@ -44,6 +44,7 @@ public class UdpMulticast extends TransportProtocol {
     /**
      * Stops the socket.
      */
+    @Override
     public void close() {
         running = false;
         socket.close();
@@ -55,6 +56,7 @@ public class UdpMulticast extends TransportProtocol {
      * @param data
      *            Packet data.
      */
+    @Override
     public void send(byte[] data) {
         DatagramPacket p = new DatagramPacket(data, data.length, address, port);
         try {

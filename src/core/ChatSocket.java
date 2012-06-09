@@ -13,8 +13,6 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
-import java.util.logging.Logger;
-
 import packets.ChatPacket;
 import packets.ChatPayload;
 import security.Security;

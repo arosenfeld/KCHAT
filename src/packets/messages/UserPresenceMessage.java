@@ -2,7 +2,6 @@ package packets.messages;
 
 import java.io.IOException;
 
-import packets.ChatPacket;
 import packets.ChatPayload;
 import packets.ChatPacket.PacketType;
 import packing.PacketReader;
