@@ -110,7 +110,6 @@ public class UserMessageCommand extends Command {
         // If no purge received and message is persistent, resend as
         // persistent
         if (received == null) {
-            Logging.getLogger().info("Persist set and no response received.");
             msg.setParam(MessageField.PERSIST, true);
             msg.setPersistenceId(socket.getNextPersistId());
             ChatPacket packet = socket.wrapPayload(msg);

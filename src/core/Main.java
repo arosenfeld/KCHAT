@@ -9,6 +9,10 @@ import operations.commands.PresenceCommand;
 import operations.commands.RoomMessageCommand;
 import operations.commands.UserMessageCommand;
 import packets.ChatPacket;
+import packets.ChatPacket.PacketType;
+import packets.messages.ChatMessage;
+import packets.messages.UserPresenceMessage;
+import packets.messages.UserPresenceMessage.PresenceStatus;
 import transport.UdpMulticast;
 import util.Configuration;
 import util.LongInteger;
@@ -45,9 +49,17 @@ public class Main {
                 new ChatPacketCallback() {
 
                     @Override
-                    public void receivePacket(ChatPacket message) {
-                        System.out.println("! Received Packet " + message);
-                        System.out.println("----------------------------");
+                    public void receivePacket(ChatPacket packet) {
+                        if (packet.getType() == PacketType.CHAT_MESSAGE) {
+                            ChatMessage msg = (ChatMessage) packet.getPayload();
+                            System.out.println("Got message from " + packet.getSrc() + ": "
+                                    + new String(msg.getMessage()));
+                        } else if (packet.getType() == PacketType.USER_PRESENCE) {
+                            UserPresenceMessage pres = (UserPresenceMessage) packet.getPayload();
+                            String action = pres.getPresenceStatus() == PresenceStatus.JOIN ? "joined" : "left";
+                            System.out.println("User " + packet.getSrc().toString() + " " + action + " room "
+                                    + pres.getRoomName());
+                        }
                     }
                 }, new LongInteger(cmdLine.readLine()));
         System.out.println("Starting socket with ID " + sock.getUUID());
