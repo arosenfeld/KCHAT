@@ -25,7 +25,6 @@ public class PersistenceHandler extends Handler {
             for (int seq : sock.getPersistenceManager().getHeard(mfst.getSrc())) {
                 if (!mfst.getSeqs().contains(seq)) {
                     try {
-                        Logging.getLogger().info("Pushing " + mfst.getSrc() + " " + seq);
                         PushMessage msg = new PushMessage(mfst.getSrc(), sock.getPersistenceManager().getPacket(
                                 mfst.getSrc(), seq));
                         sock.sendPacket(sock.wrapPayload(msg));

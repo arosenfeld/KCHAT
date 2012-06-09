@@ -156,16 +156,20 @@ public class ChatSocket implements PacketCallback {
         grtt *= 2;
     }
 
-    public void pushToClient(ChatPacket packet) {
+    public void pushToClient(ChatPacket packet, boolean forcePush) {
         if (!passedToClient.containsKey(packet.getSrc())) {
             passedToClient.put(packet.getSrc(), new HashSet<Integer>());
         }
 
         int msgId = ((ChatMessage) packet.getPayload()).getMessageId();
-        if (!passedToClient.get(packet.getSrc()).contains(msgId)) {
+        if (!passedToClient.get(packet.getSrc()).contains(msgId) || forcePush) {
             passedToClient.get(packet.getSrc()).add(msgId);
             clientCallback.receivePacket(packet);
         }
+    }
+
+    public void pushToClient(ChatPacket packet) {
+        pushToClient(packet, false);
     }
 
     public ChatPacket wrapPayload(ChatPayload pld) {

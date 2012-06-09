@@ -1,6 +1,7 @@
 package core;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,6 +13,7 @@ import packets.ChatPacket.PacketType;
 import packets.messages.ChatMessage;
 import packets.messages.ManifestMessage;
 import packets.messages.PushMessage;
+import packets.messages.ChatMessage.MessageField;
 
 import util.Logging;
 import util.LongInteger;
@@ -39,6 +41,44 @@ public class PersistenceManager extends Thread {
 
     public Set<Integer> getHeard(LongInteger src) {
         return store.getHeard(src);
+    }
+
+    public ChatPacket[] getRoomMessages(LongInteger room) {
+        // TODO: Fix this
+        if (!store.messages.containsKey(room)) {
+            return new ChatPacket[0];
+        }
+
+        ArrayList<Integer> sorted = new ArrayList<Integer>();
+        for (LongInteger src : store.messages.keySet()) {
+            for (ChatPacket p : store.messages.get(src).values()) {
+                if (p.getType() == PacketType.CHAT_MESSAGE) {
+                    ChatMessage msg = (ChatMessage) p.getPayload();
+                    if (msg.getParam(MessageField.TO_ROOM) && msg.getDest().equals(room)) {
+                        sorted.add(msg.getPersistenceId());
+                    }
+                }
+            }
+        }
+
+        Collections.sort(sorted);
+        ChatPacket[] ret = new ChatPacket[sorted.size()];
+        for (int i = 0; i < sorted.size(); i++) {
+            ret[i] = store.messages.get(room).get(sorted.get(i));
+        }
+        return ret;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (LongInteger room : store.messages.keySet()) {
+            sb.append("Name: " + room + "\n");
+            for (Integer s : store.messages.get(room).keySet()) {
+                sb.append("      " + s + "\n");
+            }
+        }
+        return sb.toString();
     }
 
     @Override
