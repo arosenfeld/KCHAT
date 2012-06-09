@@ -11,6 +11,7 @@ import packets.ChatPacket;
 import packets.ChatPacket.PacketType;
 import packets.messages.ChatMessage;
 import packets.messages.ManifestMessage;
+import packets.messages.PushMessage;
 
 import util.Logging;
 import util.LongInteger;
@@ -25,9 +26,7 @@ public class PersistenceManager extends Thread {
     }
 
     public void persistPacket(ChatPacket packet) {
-        if (packet.getType() == PacketType.CHAT_MESSAGE) {
-            store.addPacket(packet);
-        }
+        store.addPacket(packet);
     }
 
     public void purgePacket(ChatPacket packet) {
@@ -48,7 +47,8 @@ public class PersistenceManager extends Thread {
             try {
                 for (LongInteger src : store.getSrcs()) {
                     ManifestMessage manifest = new ManifestMessage(src, store.getHeard(src));
-                    sock.sendPacket(sock.wrapPayload(manifest));
+                    ChatPacket packet = sock.wrapPayload(manifest);
+                    sock.sendPacket(packet);
                 }
                 Thread.sleep(sock.getGRTT());
             } catch (InterruptedException e) {
@@ -67,10 +67,15 @@ public class PersistenceManager extends Thread {
         }
 
         public synchronized void addPacket(ChatPacket p) {
+            if (!messages.containsKey(p.getSrc())) {
+                messages.put(p.getSrc(), new HashMap<Integer, ChatPacket>());
+            }
+
+            if (p.getType() == PacketType.PUSH) {
+                p = ((PushMessage) p.getPayload()).getPacket();
+            }
+
             if (p.getType() == PacketType.CHAT_MESSAGE) {
-                if (!messages.containsKey(p.getSrc())) {
-                    messages.put(p.getSrc(), new HashMap<Integer, ChatPacket>());
-                }
                 messages.get(p.getSrc()).put(((ChatMessage) p.getPayload()).getPersistenceId(), p);
             }
         }
@@ -96,6 +101,7 @@ public class PersistenceManager extends Thread {
             if (!messages.containsKey(src)) {
                 return new HashSet<Integer>();
             }
+
             return messages.get(src).keySet();
         }
     }

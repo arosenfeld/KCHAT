@@ -1,8 +1,5 @@
 package operations.handlers;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-
 import core.ChatSocket;
 import operations.PacketMatcher.TypeMatcher;
 import packets.ChatPacket;
@@ -73,7 +70,6 @@ public class ChatMessageHandler extends Handler {
         }
 
         if (shouldPass(socket, original)) {
-
             if (!original.getParam(MessageField.TO_ROOM)) {
                 try {
                     original.setMessage(socket.getSecurityManager().decrypt(original.getMessage()));

@@ -49,7 +49,8 @@ public class ManifestMessage implements ChatPayload {
     public byte[] pack() throws IOException {
         PacketWriter pw = new PacketWriter();
         pw.writeLongInteger(src);
-        pw.writeShort((short) seqs.size());
+        short sz = (short) seqs.size();
+        pw.writeShort(sz);
         for (int s : seqs) {
             pw.writeInt(s);
         }
@@ -59,10 +60,24 @@ public class ManifestMessage implements ChatPayload {
     @Override
     public void unPack(byte[] data) {
         PacketReader pr = new PacketReader(data);
-        src = pr.readLongInteger();
-        seqs = new HashSet<Integer>();
-        for (int i = 0; i < pr.readShort(); i++) {
-            seqs.add(pr.readInt());
+        this.src = pr.readLongInteger();
+        this.seqs = new HashSet<Integer>();
+        short sz = pr.readShort();
+        for (int i = 0; i < sz; i++) {
+            int s = pr.readInt();
+            this.seqs.add(s);
         }
+    }
+
+    @Override
+    public String toString() {
+        StringBuffer sb = new StringBuffer();
+        sb.append("Src: " + src + "\n");
+        sb.append("Size: " + seqs.size() + "\n");
+        for (int index : seqs) {
+            sb.append("    " + index);
+        }
+
+        return sb.toString();
     }
 }
