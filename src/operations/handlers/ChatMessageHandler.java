@@ -34,7 +34,7 @@ public class ChatMessageHandler extends Handler {
 
     public void processChatMessage(ChatSocket socket, ChatPacket packet) {
         ChatMessage msg = (ChatMessage) packet.getPayload();
-        if (msg.getParam(MessageField.TO_ROOM) || msg.getDest().equals(socket.getUUID())) {
+        if (msg.getParam(MessageField.TO_ROOM)) {
             if (msg.getDest().equals(socket.getUUID())) {
                 try {
                     socket.executeCommand(new PurgeCommand(msg.getMessageId()));
@@ -46,6 +46,9 @@ public class ChatMessageHandler extends Handler {
                     return;
                 }
             }
+            socket.pushToClient(packet);
+        } else if (!msg.getParam(MessageField.TO_ROOM) && msg.getDest().equals(socket.getUUID())) {
+            // Decrypt packet
             socket.pushToClient(packet);
         }
     }
